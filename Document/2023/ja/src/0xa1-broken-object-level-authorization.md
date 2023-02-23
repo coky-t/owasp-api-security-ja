@@ -4,29 +4,29 @@ API1:2023 オブジェクトレベル認可の不備 (Broken Object Level Author
 | 脅威エージェント/攻撃手法 | セキュリティ上の弱点 | 影響 |
 | - | - | - |
 | API 依存 : 悪用難易度 **3** | 普及度 **3** : 検出難易度 **2** | 技術的影響 **3** : ビジネス依存 |
-| Attackers can exploit API endpoints that are vulnerable to broken object level authorization by manipulating the ID of an object that is sent within the request. This can lead to unauthorized access to sensitive data. This issue is extremely common in API-based applications because the server component usually does not fully track the client's state, and instead, relies more on parameters like object IDs, that are sent from the client to decide which objects to access. | This has been the most common and impactful attack on APIs. Authorization and access control mechanisms in modern applications are complex and widespread. Even if the application implements a proper infrastructure for authorization checks, developers might forget to use these checks before accessing a sensitive object. Access control detection is not typically amenable to automated static or dynamic testing. | Unauthorized access can result in data disclosure to unauthorized parties, data loss, or data manipulation. Unauthorized access to objects can also lead to full account takeover. |
+| 攻撃者はリクエスト内で送信されるオブジェクトの ID を操作することで、オブジェクトレベル認可に不備がある脆弱な API エンドポイントを悪用できます。これは機密データへの不認可アクセスにつながる可能性があります。この問題は API ベースのアプリケーションにおいて非常に一般的です。なぜならサーバーコンポーネントは通常、クライアントの状態を完全には追跡せず、代わりにクライアントから送信されるオブジェクト ID などのパラメータに依存して、どのオブジェクトにアクセスするかを決定しているからです。 | これは API に対する最も一般的で影響力のある攻撃です。最近のアプリケーションの認可とアクセス制御のメカニズムは複雑で広範囲に及んでいます。アプリケーションが認可チェック用の適切なインフラストラクチャを実装していても、開発者は機密性の高いオブジェクトにアクセスする前にこれらのチェックを使用することを忘れてしまうかもしれません。アクセス制御の検出は一般的に自動静的テストや自動動的テストには適していません。 | 不認可アクセスは不認可な第三者へのデータ開示、データ損失、データ操作につながる可能性があります。オブジェクトへの不認可アクセスはアカウントの完全な乗っ取りにつながる可能性もあります。 |
 
 ## その API は脆弱か？
 
-Object level authorization is an access control mechanism that is usually implemented at the code level to validate that a user can only access the objects that they should have permissions to access.
+オブジェクトレベル認可は通常はコードレベルで実装されるアクセス制御メカニズムであり、ユーザーがアクセス許可を持つべきオブジェクトにのみアクセスできることを検証するものです。
 
 
 
-Every API endpoint that receives an ID of an object, and performs any action on the object, should implement object-level authorization checks. 
-The checks should validate that the logged-in user has permissions to perform the requested action on the requested object.
+オブジェクトの ID を受け取り、そのオブジェクトに対して何らかのアクションを実行するすべての API エンドポイントはオブジェクトレベル認可チェックを実装する必要があります。
+このチェックではログインしたユーザーがリクエストしたオブジェクトに対してリクエストしたアクションを実行する権限を持っていることを検証する必要があります。
 
 
 
-Failures in this mechanism typically lead to unauthorized information disclosure, modification, or destruction of all data.
+このメカニズムの障害は一般的にすべてのデータの不認可な情報開示、改変、破壊につながります。
 
 
-Comparing the user ID of the current session (e.g. by extracting it from the JWT token) with the vulnerable ID parameter isn't a sufficient solution to solve BOLA. 
-This approach could address only a small subset of cases.
+現在のセッションのユーザー ID を (JWT トークンから抽出するなどして) 脆弱な ID パラメーターと比較することは BOLA を解決するための十分な解決策とは言えません。
+このアプローチではごく一部のケースにしか対処できません。
 
 
-In the case of BOLA, it's by design that the user will have access to the vulnerable API endpoint/function. 
-The violation happens at the object level, by manipulating the ID. 
-If an attacker manages to access an API endpoint/function they should not have access to - this is a case of BFLA rather than BOLA.
+BOLA の場合には、ユーザーが脆弱な API エンドポイントや機能にアクセスすることは意図したものです。
+違反は ID を操作することによりオブジェクトレベルで発生します。
+攻撃者がアクセスすべきではない API エンドポイントや機能にアクセスできる場合、これは BOLA というより BFLA のケースとなります。
 
 
 
@@ -34,10 +34,10 @@ If an attacker manages to access an API endpoint/function they should not have a
 
 ### シナリオ #1
 
-An e-commerce platform for online stores (shops) provides a listing page with the revenue charts for their hosted shops. 
-Inspecting the browser requests, an attacker can identify the API endpoints used as a data source for those charts and their pattern `/shops/{shopName}/revenue_data.json`. 
-Using another API endpoint, the attacker can get the list of all hosted shop names. 
-With a simple script to manipulate the names in the list, replacing `{shopName}` in the URL, the attacker gains access to the sales data of thousands of e-commerce stores.
+オンラインストア (ショップ) 用の e コマースではホストされているショップの収益チャートがある一覧ページを提供します。
+ブラウザのリクエストを調べることで、攻撃者はこれらのチャートのデータソースとして使用されている API エンドポイントとそのパターン `/shops/{shopName}/revenue_data.json` を特定できます。
+他の API エンドポイントを使用することで、攻撃者はホストされているショップ名のリストを取得できます。
+そのリストの名前を操作する簡単なスクリプトで URL の `{shopName}` を置き換えることで、攻撃者は数千の e コマースストアの売上データにアクセスできます。
 
 
 
@@ -45,19 +45,19 @@ With a simple script to manipulate the names in the list, replacing `{shopName}`
 
 ### シナリオ #2
 
-An automobile manufacturer has enabled remote control of its vehicles via a mobile API for communication with the driver's mobile phone. 
-The API enables the driver to remotely start and stop the engine and lock and unlock the doors.
-As part of this flow, the user sends the Vehicle Identification Number (VIN) to the API.
+自動車製造業者は運転者のモバイルフォンと通信するモバイル API で車両の遠隔操作を可能にしました。
+この API で運転者は遠隔でエンジンの始動と停止やドアのロックとアンロックを行うことができます。
+このフローの一環として、ユーザーは車両識別番号 (Vehicle Identification Number, VIN) を API に送信します。
 
 
-The API fails to validate that the VIN represents a vehicle that belongs to the logged in user, which leads to a BOLA vulnerability. 
-An attacker can access vehicles that don't belong to them.
+この API は VIN がログインしているユーザーの車両であることを検証できず、BOLA 脆弱性につながります。
+攻撃者は自らが所有していない車両にアクセスできます。
 
 
 ### シナリオ #3
 
-An online document storage service allows users to view, edit, store and delete their documents. 
-When a user's document is deleted, a GraphQL mutation with the document ID is sent to the API.
+オンライン文書保管サービスではユーザーが自らの文書を閲覧、編集、保管、削除できます。
+ユーザーの文書が削除される際、文書 ID がある GraphQL 情報が API に送信されます。
 
 
 ```
@@ -75,18 +75,18 @@ POST /graphql
 }
 ```
 
-Since a document ID is deleted without any further permission checks, a user may be able to delete another user's document.
+文書 ID はそれ以上の権限チェックなしで削除されるため、ユーザーは他のユーザーの文書を削除できてしまう可能性があります。
 
 
 ## 防止方法
 
-* Implement a proper authorization mechanism that relies on the user policies  and hierarchy.
+* ユーザーポリシーとヒエラルキーに依存する適切な認可メカニズムを実装します。
 
-* Use the authorization mechanism to check if the logged-in user has access to  perform the requested action on the record in every function that uses an  input from the client to access a record in the database.
+* クライアントからの入力を使用してデータベースのレコードにアクセスするすべての関数で、ログインしているユーザーがそのレコードに対してリクエストしたアクションを実行するためのアクセス権を持っているかどうかを、認可メカニズムを使用して確認します。
 
 
-* Prefer the use of random and unpredictable values as GUIDs for records' IDs.
-* Write tests to evaluate the vulnerability of the authorization mechanism. Do  not deploy changes that make the tests fail.
+* レコードの ID にはランダムで予測不可能な値を GUID として使用することを推奨します。
+* 認可メカニズムの脆弱性を評価するテストを作成します。テストが不合格となるような変更をデプロイしてはいけません。
 
 
 
