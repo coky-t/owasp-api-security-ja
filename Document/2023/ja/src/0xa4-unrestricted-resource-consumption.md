@@ -4,40 +4,40 @@ API4:2023 制限のないリソース消費 (Unrestricted Resource Consumption)
 | 脅威エージェント/攻撃手法 | セキュリティ上の弱点 | 影響 |
 | - | - | - |
 | API 依存 : 悪用難易度 **2** | 普及度 **3** : 検出難易度 **3** | 技術的影響 **2** : ビジネス依存 |
-| Exploitation requires simple API requests. Multiple concurrent requests can be performed from a single local computer or by using cloud computing resources. | It's common to find APIs that do not limit client interactions or resource consumptions. Although most of the time interactions are logged, due to the lack of monitoring,  or improper monitoring, malicious activity passes unnoticed. | Exploitation can lead to DoS due to resource starvation, but it can also impact service providers' billing. |
+| エクスプロイトはシンプルな API リクエストを必要とします。複数の同時リクエストは単一のローカルコンピュータから、またはクラウドコンピューティングリソースを使用することで実行できます。 | クライアントとのインタラクションやリソース消費を制限しない API を見かけることはよくあります。ほとんどの場合、インタラクションはログに記録されますが、監視の欠如や不適切な監視によって、悪意のあるアクティビティが気づかれずに見過ごされてしまいます。 | エクスプロイトはリソース枯渇による DoS につながる可能性がありますが、サービスプロバイダの請求にも影響を与える可能性があります。 |
 
 ## その API は脆弱か？
 
-Satisfying API requests requires resources such as network bandwidth, CPU, memory, and storage. Sometimes required resources are made available by service providers via API integrations, and paid for per request, such as sending emails/SMS/phone calls, biometrics validation, etc.
+API リクエストを満たすにはネットワーク帯域幅、CPU、メモリ、ストレージなどのリソースが必要です。必要なリソースはサービスプロバイダが API 統合によって利用可能になり、電子メール、SMS、電話コールの送信や生体認証での検証など、リクエストごとに料金を支払うこともあります。
 
 
 
 
-An API is vulnerable if at least one of the following limits is missing or set inappropriately (e.g. too low/high):
+以下の制限のうち一つでも欠落していたり不適切に設定されている (低すぎる、高すぎるなど) 場合、API は脆弱となります。
 
 
-* Execution timeouts
-* Maximum allocable memory
-* Maximum number of file descriptors
-* Maximum number of processes
-* Maximum upload file size
-* Number of operations to perform in a single API client request (e.g. GraphQL   batching)
+* 実行タイムアウト
+* 最大割り当てメモリ
+* ファイルディスクリプタの最大数
+* プロセスの最大数
+* 最大アップロードファイルサイズ
+* 一回の API クライアントリクエストで実行するオペレーション数 (GraphQL バッチ処理など)
 
-* Number of records per page to return in a single request-response
-* Third-party service providers' spending limit
+* 一回のリクエスト・レスポンスで返せるページごとのレコード数
+* サードパーティサービスプロバイダの利用限度額
 
 ## 攻撃シナリオの例
 
 ### シナリオ #1
 
-An attacker uploads a large image by issuing a POST request to /api/v1/images.
-When the upload is complete, the API creates multiple thumbnails with different sizes. 
-Due to the size of the uploaded image, available memory is exhausted during the creation of thumbnails and the API becomes unresponsive.
+攻撃者は /api/v1/images に POST リクエストを発行して大きな画像をアップロードします。
+アップロードが完了すると、API は異なるサイズの複数のサムネイルを作成します。
+アップロードされた画像のサイズが原因で、サムネイルの作成中に利用可能なメモリが枯渇し、この API は応答しなくなります。
 
 
 ### シナリオ #2
 
-In order to activate a credit card the following API request should be issued providing the last four digits printed on it (only users with physical access to the card should be able to perform such operation):
+クレジットカードをアクティベートするにはクレジットカードに印字されている最後の四桁の数字を指定して、以下の API リクエストを発行する必要があります。 (そのカードに物理的にアクセスできるユーザーのみがこのような操作を実行できるはずです)
 
 
 
@@ -53,7 +53,7 @@ POST /graphql
 }
 ```
 
-Bad actors will be able to perform the credit card activation without physical access to it, crafting a request like the one below:
+悪意のある人物は以下のようなリクエストを作成して、クレジットカードに物理的にアクセスすることなくクレジットカードのアクティベーションを実行できるでしょう。
 
 
 ```
@@ -67,41 +67,41 @@ POST /graphql
 }
 ```
 
-Because the API does not limit the number of times the activateCard operation can be attempted, one of the mutations will succeed.
+この API は activateCard オペレーションの試行回数を制限していないため、いずれか一つが成功するでしょう。
 
 
 ### シナリオ #3
 
-A service provider allows clients to download arbitrarily large files using its API. 
-These files are stored in cloud object storage and they don't change that often. 
-The service provider relies on a cache service to have a better service rate and to keep bandwidth consumption low. 
-The cache service only caches files up to 15GB.
+サービスプロバイダはクライアントが API を使用して任意の大きさのファイルをダウンロードできるようにします。
+これらのファイルはクラウドオブジェクトストレージに保存され、それほど頻繁に変更されることはありません。
+このサービスプロバイダはサービスレートを向上させ、帯域幅の消費を低く抑えるために、キャッシュサービスに依存しています。
+このキャッシュサービスは 15GB までのファイルしかキャッシュしません。
 
 
-When one of the files gets updated, its size increases to 18GB.
-All service clients immediately start pulling the new version.
-Because there were no  consumption cost alerts, nor a maximum cost allowance for the cloud service, the next monthly bill increases from US$13, on average, to US$8k.
+ファイルの一つが更新されると、そのサイズは 18GB に増加します。
+すべてのサービスクライアントはすぐに新しいバージョンの取得を開始します。
+このクラウドサービスには消費コストアラートも最大コスト許容値もなかったため、翌月の請求額は平均で 13 米ドルから 8000 米ドルに増加しました。
 
 
 ## 防止方法
 
-* Use container-based solutions that make it easy to limit [memory][1],  [CPU][2], [number of restarts][3], [file descriptors, and processes][4].
+* [メモリ][1]、[CPU][2]、[再起動回数][3]、[ファイルディスクリプタ、プロセス][4] を簡単に制限できるコンテナベースのソリューションを使用します。
 
-* Define and enforce a maximum size of data on all incoming parameters and  payloads, such as maximum length for strings, maximum number of elements in  arrays, and maximum upload file size (regardless of whether it is stored  locally or in cloud storage).
-
-
-
-* Implement a limit on how often a client can interact with the API within a  defined timeframe (rate limiting).
-
-* Rate limiting should be fine tuned based on the business needs. Some API  Endpoints might require stricter policies.
-
-* Limit/throttle how many times or how often a single API client/user can  execute a single operation (e.g. validate an OTP, or request password  recovery without visiting the one-time URL).
+* 文字列の最大長、配列の最大要素数、アップロードファイルの最大サイズ (保存がローカルかクラウドストレージかに関係なく) など、受信するすべてのパラメータとペイロードのデータサイズの最大値を定義して適用します。
 
 
-* Add proper server-side validation for query string and request body  parameters, specifically the one that controls the number of records to be  returned in the response.
+
+* 定義された時間枠内でクライアントが API とやり取りできる回数に制限 (レート制限) を実装します。
+
+* レート制限はビジネスニーズに基づいて微調整する必要があります。API エンドポイントによっては、より厳格なポリシーが必要になることもあります。
+
+* 一つの API クライアントやユーザーが一つのオペレーション (OTP の検証や、ワンタイム URL をアクセスせずにパスワードリカバリをリクエストするなど) を実行できる回数や頻度を制限や調整します。
 
 
-* Configure spending limits for all service providers/API integrations. When  setting spending limits is not possible, billing alerts should be configured  instead.
+* クエリ文字列とリクエストボディパラメータ、特にレスポンスで返されるレコード数を制御するものに対して、適切なサーバーサイドの検証を追加します。
+
+
+* すべてのサービスプロバイダや API 統合に対して支出制限を設定します。支出制限を設定できない場合には、代わりに課金アラートを設定すべきです。
 
 
 
