@@ -4,27 +4,27 @@ API5:2023 機能レベル認可の不備 (Broken Function Level Authorization)
 | 脅威エージェント/攻撃手法 | セキュリティ上の弱点 | 影響 |
 | - | - | - |
 | API 依存 : 悪用難易度 **3** | 普及度 **2** : 検出難易度 **1** | 技術的影響 **2** : ビジネス依存 |
-| Exploitation requires the attacker to send legitimate API calls to the API endpoint that they should not have access to. These endpoints might be exposed to anonymous users or regular, non-privileged users. It's easier to discover these flaws in APIs since APIs are more structured, and the way to access certain functions is more predictable (e.g. replacing the HTTP method from GET to PUT, or changing the "users" string in the URL to "admins"). | Authorization checks for a function or resource are usually managed via configuration, and sometimes at the code level. Implementing proper checks can be a confusing task since modern applications can contain many types of roles or groups and complex user hierarchies (e.g.  sub-users, or users with more than one role). Detection relies on proper logging and monitoring. | Such flaws allow attackers to access unauthorized functionality. Administrative functions are key targets for this type of attack. |
+| エクスプロイトには攻撃者がアクセスしないはずの API エンドポイントに正当な API コールを送信する必要があります。これらのエンドポイントには匿名ユーザーや通常の非特権ユーザーに公開されている可能性があります。API は多くが構造化されており、特定の機能にアクセスする方法も多くが予測可能 (HTTP メソッドを GET から PUT に置き換えたり、URL の "users" 文字列を "admins" に変更するなど) であるため、API のこれらの欠陥を発見することは容易です。 | 機能やリソースに対する認可チェックは通常は設定によって管理されますが、コードレベルでのこともあります。最近のアプリケーションには多くの種類のロールやグループ、複雑なユーザー階層 (サブユーザーや複数のロール持つユーザーなど) を含むことがあるため、適切なチェックを実装するのは混乱を招く作業になるかもしれません。検出は適切なログ記録と監視に依存します。 | このような欠陥があると、攻撃者は認可されていない機能にアクセスできます。この種の攻撃では管理機能が重要なターゲットとなります。 |
 
 ## その API は脆弱か？
 
-The best way to find broken function level authorization issues is to perform a deep analysis of the authorization mechanism while keeping in mind the user hierarchy, different roles or groups in the application, and asking the following questions:
+機能レベル認可の不備の問題を見つける最良の方法はユーザー階層、アプリケーション内のさまざまなロールやグループを念頭に置きながら、認可メカニズムを深く解析し、以下の質問をすることです。
 
 
 
 
-* Can a regular user access administrative endpoints?
-* Can a user perform sensitive actions (e.g. creation, modification, or  deletion ) that they should not have access to by simply changing the HTTP  method (e.g. from `GET` to `DELETE`)?
+* 一般ユーザーが管理エンドポイントにアクセスできますか？
+* ユーザーは単に HTTP メソッドを変更 (`GET` から `DELETE` へなど) するだけで、アクセスできないはずの機密性の高い操作 (作成、変更、削除など) を実行できますか？
 
 
-* Can a user from group X access a function that should be exposed only to  users from group Y, by simply guessing the endpoint URL and parameters  (e.g. `/api/v1/users/export_all`)?
+* グループ X のユーザーはエンドポイント URL とパラメータを推測するだけで、グループ Y のユーザーのみに公開されるべき機能  (`/api/v1/users/export_all` など)  にアクセスできますか？
 
 
 
-Don't assume that an API endpoint is regular or administrative only based on the URL path.
+URL パスだけをベースとして API エンドポイントが通常か管理かを決めてはいけません。
 
 
-While developers might choose to expose most of the administrative endpoints under a specific relative path, like `/api/admins`, it's very common to find these administrative endpoints under other relative paths together with regular endpoints, like `/api/users`.
+開発者は `/api/admins` のような特定の相対パスでほとんどの管理エンドポイントを公開することを選択するかもしれませんが、 `/api/users` のような一般エンドポイントとともに他の相対パスで管理エンドポイントを見つけることはとてもよくあることです。
 
 
 
@@ -33,17 +33,17 @@ While developers might choose to expose most of the administrative endpoints und
 
 ### シナリオ #1
 
-During the registration process for an application that allows only invited users to join, the mobile application triggers an API call to `GET /api/invites/{invite_guid}`. The response contains a JSON with details about the invite, including the user's role and the user's email.
+招待されたユーザーのみが参加できるアプリケーションの登録プロセス中に、モバイルアプリケーションは `GET /api/invites/{invite_guid}` への API コールをトリガーします。
+レスポンスにはユーザーのロールやユーザーの電子メールなど招待についての詳細が記された JSON が含まれています。
 
 
 
+攻撃者はリクエストを複製し、HTTP メソッドとエンドポイントを操作して `POST /api/invites/new` にします。
+このエンドポイントは管理コンソールを使用して管理者のみがアクセスできる必要があります。
+このエンドポイントには機能レベルの認可チェックを実装していません。
 
-An attacker duplicates the request and manipulates the HTTP method and endpoint to `POST /api/invites/new`. 
-This endpoint should only be accessed by administrators using the admin console. 
-The endpoint does not implement function level authorization checks.
 
-
-The attacker exploits the issue and sends a new invite with admin privileges:
+攻撃者はこの問題を悪用し、管理者権限を付与して新規招待を送信します。
 
 ```
 POST /api/invites/new
@@ -51,34 +51,34 @@ POST /api/invites/new
 {"email":"attacker@somehost.com","role":"admin"}
 ```
 
-Later on, the attacker uses the maliciously crafted invite in order to create themselves an admin account and gain full access to the system.
+その後、攻撃者は悪意を持って作成された招待を使用して自分自身に管理者アカウントを作成し、システムへのフルアクセスを獲得します。
 
 
 ### シナリオ #2
 
-An API contains an endpoint that should be exposed only to administrators - `GET /api/admin/v1/users/all`. 
-This endpoint returns the details of all the users of the application and does not implement function level authorization checks. 
-An attacker who learned the API structure takes an educated guess and manages to access this endpoint, which exposes sensitive details of the users of the application.
+API には管理者のみに公開すべきエンドポイント `GET /api/admin/v1/users/all` があります。
+このエンドポイントはアプリケーションのすべてのユーザーの詳細を返しますが、機能レベルの認可チェックを実装していません。
+API の構造を突き止めた攻撃者は経験に基づいた推測でこのエンドポイントにアクセスすることに成功し、アプリケーションのユーザーの機密情報を暴露してしまいます。
 
 
 
 
 ## 防止方法
 
-Your application should have a consistent and easy-to-analyze authorization module that is invoked from all your business functions. 
-Frequently, such protection is provided by one or more components external to the application code.
+アプリケーションにはすべてのビジネス機能から呼び出されて一貫性があり解析が容易な認可モジュールを持つ必要があります。
+多くの場合、このような保護はアプリケーションコードの外部にある一つまたは複数のコンポーネントによって提供されます。
 
 
 
 
-* The enforcement mechanism(s) should deny all access by default, requiring  explicit grants to specific roles for access to every function.
+* 執行メカニズムはデフォルトですべてのアクセスを拒否し、すべての機能へのアクセスには特定のロールへの明示的な付与を必要とします。
 
-* Review your API endpoints against function level authorization flaws, while  keeping in mind the business logic of the application and groups hierarchy.
+* アプリケーションのビジネスロジックとグループの階層を念頭に置きながら、API エンドポイントを機能レベルの認可の欠陥についてレビューします。
 
-* Make sure that all of your administrative controllers inherit from an  administrative abstract controller that implements authorization checks  based on the user's group/role.
+* すべての管理コントローラがユーザーのグループやロールに基づく認可チェックを実装した管理抽象コントローラから継承していることを確認します。
 
 
-* Make sure that administrative functions inside a regular controller implement  authorization checks based on the user's group and role.
+* 一般コントローラ内の管理機能にはユーザーのグループやロールに基づく認可チェックを実装していることを確認します。
 
 
 ## 参考資料
