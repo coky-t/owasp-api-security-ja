@@ -4,85 +4,85 @@ API8:2023 自動化された脅威への不十分な保護 (Lack of Protection f
 | 脅威エージェント/攻撃手法 | セキュリティ上の弱点 | 影響 |
 | - | - | - |
 | API 依存 : 悪用難易度 **3** | 普及度 **3** : 検出難易度 **1** | 技術的影響 **1** : ビジネス依存 |
-| Exploitation usually involves understanding of the business model of the API, finding sensitive business flows, and automating access to these flows, causing harm to the business.  | When broken down, each of an attack's requests represent a completely legitimate request and cannot be identified as an attack. An attack can be identified only when looking at the sum of the requests in regards to the service/application business logic. | In general technical impact is not expected. Exploitation might hurt the business in different ways, for example: 1. Prevent legitimate users from purchasing a product; 2. Lead to inflation in the internal economy of a game; 3. Allow the attacker to send excessive amounts of messages/comments and easily spread fake news. |
+| 悪用には通常、API のビジネスモデルの理解、機密性の高いビジネスフローの発見、これらのフローへのアクセスの自動化を必要とし、そのビジネスに損害を与えます。 | 分解すると、攻撃の各リクエストは完全に正当なリクエストであり、攻撃として識別できません。攻撃はサービスやアプリケーションのビジネスロジックに関するリクエストの合計に目を向けたときにのみ識別できます。 | 一般的に技術的影響は予期されません。悪用により次のようなさまざまな形でビジネスに悪影響を及ぼす可能性があります。1. 正規のユーザーが製品を購入できない 2. ゲームの内部経済にインフレをもたらす 3. 攻撃者が過剰な量のメッセージやコメントを送信して、フェイクニュースを拡散できる |
 
 ## その API は脆弱か？
 
-Automated threats have become more profitable, smarter and harder to protect from, and APIs are often used as an easy target for them. 
-Traditional protections, such as rate limiting and captchas become less effective over time. 
-For example, an attacker who operates bot-nets (for scalping) gets around rate limiting because they can easily access the API from thousands of location/IP addresses around the world, in a matter of seconds.
+自動化された脅威はより収益性が高く、より巧妙で、保護することがより困難になり、API はその格好のターゲットとして使用されることがよくあります。
+レート制限や CAPTCHA などの従来の保護は時間の経過とともに効果が薄れていきます。
+たとえば、(スキャルピング用の) ボットネットを操作する攻撃者は数秒のうちに世界中の何千もの場所や IP アドレスから簡単に API にアクセスできるためレート制限を回避できます。
 
 
 
 
-Vulnerable APIs don't necessarily have implementation bugs. 
-They simply expose a business flow - such as buying a ticket, or posting a comment - without considering how the functionality could harm the business if used excessively in an automated manner.
+脆弱な API には必ずしも実装上のバグがあるわけではありません。
+チケット購入やコメント投稿などのビジネスフローを公開しているだけです。自動化された方法で過度に使用された場合に機能がどのような悪影響を及ぼすかを考慮していないだけで。
 
 
 
-Each industry might have its own specific risks when it comes to automated threats.
+自動化された脅威には業界ごとに特有のリスクがあるかもしれません。
 
 
-An API endpoint is vulnerable if it exposes a business-sensitive functionality, and allows an attacker to harm the business by accessing it in an excessive automated manner.
+ビジネス上の重要な機能を公開しているのであれば API エンドポイントは脆弱であり、攻撃者は自動化された方法で過度にアクセスすることでビジネスに悪影響を及ぼすことができます。
 
 
 
-The [OWASP Automated Threats to Web Applications][1] covers different types of automated threats and their impact.
+[OWASP Automated Threats to Web Applications][1] ではさまざまな種類の自動化された脅威とその影響について説明しています。
 
 
 ## 攻撃シナリオの例
 
 ### シナリオ #1
 
-A technology company announces they are going to release a new gaming console on Thanksgiving. 
-The product has a very high demand and the stock is limited. 
-An attacker, operator of a network of automated threats, writes code to automatically buy the new product and complete the transaction. 
+あるテクノロジ企業が感謝祭に新しいゲーム機を発売すると発表しました。
+この製品は非常に高い需要があり、在庫は限られています。
+自動化された脅威のネットワークのオペレータである攻撃者は新しい製品を自動的に購入してトランザクションを完了するコードを記述します。
 
 
-On the release day, the attacker runs the code distributed across different IP addresses and locations. 
-The API doesn't implement the appropriate protection  and allows the attacker to buy the majority of the stock before other legitimate users.
+発売日に攻撃者はさまざまな IP アドレスやロケーションに分散したコードを実行します。
+API は適切な保護を実装しておらず、攻撃者は他の正当なユーザーよりも先に在庫の大部分を購入できます。
 
 
 
-Later on, the attacker sells the product on another platform for a much higher price.
+その後、攻撃者は別のプラットフォームでその製品をはるかに高い価格で販売します。
 
 
 
 ### シナリオ #2
 
-A ride-sharing app provides a referral program - users can invite their friends and gain credit for each friend who has joined the app. 
-This credit can be later used as cash to book rides.
+ライドシェアアプリは紹介プログラムを提供しています。ユーザーは友達を招待し、アプリに参加した友達ごとにクレジットを獲得できます。
+このクレジットは後ほど乗車を予約する際に現金として使用できます。
 
 
-An attacker exploits this flow by writing a script to automate the registration process, with each new user adding credit to the attacker's wallet.
+攻撃者はこのフローを悪用し、スクリプトを記述して登録プロセスを自動化し、新規ユーザーごとに攻撃者のウォレットにクレジットを追加します。
 
 
-The attacker can later enjoy free rides or sell the accounts with excessive credits for cash.
+攻撃者は後ほど無料乗車を楽しんだり、過剰なクレジットを持つアカウントを売却して現金に換えることができます。
 
 
 ## 防止方法
 
-The mitigation planning should be done in two layers:
+緩和計画は二つの層で行います。
 
-* Business - identify the business flows that might harm the business if they  are excessively used.
+* ビジネス - 過度に使用された場合にビジネスに悪影響を及ぼす可能性のあるビジネスフローを特定します。
 
-* Engineering - choose the right protection mechanisms to mitigate the business  risk.
-
-
-  Some of the protection mechanisms are more simple while others are more  difficult to implement. The following methods are used to slow down automated  threats:
+* エンジニアリング - 適切な保護メカニズムを選択して、ビジネスリスクを軽減します。
 
 
-
-  * Device fingerprinting: denying service to unexpected client devices (e.g    headless browsers) tends to make threat actors use more sophisticated    solutions, thus more costly for them
-
-
-  * Human detection: using either captcha or more advanced biometric solutions    (e.g. typing patterns)
-
-  * Non-human patterns: analyze the user flow to detect non-human patterns    (e.g.  the user accessed the "add to cart" and "complete purchase"    functions in less than one second)
+  保護メカニズムの中にはよりシンプルなものもあれば、実装がより困難なものもあります。自動化された脅威を遅らせるには以下の方法を使用します。
 
 
-  * Consider blocking IP addresses of Tor exit nodes and well-known proxies
-* Secure and limit access to APIs that are consumed directly by machines (such  as developer and B2B APIs). They tend to be an easy target for attackers  because they often don't implement all the required protection mechanisms.
+
+  * デバイスフィンガープリント: 予期せぬクライアントデバイス (ヘッドレスブラウザなど) へのサービスを拒否すると、脅威アクターはより洗練されたソリューションを使用する傾向があり、脅威アクターにとってよりコストがかかるようになります。
+
+
+  * 人間検出: CAPTCHA やより高度な生体認証ソリューション (タイピングパターンなど) のいずれかを使用します。
+
+  * 非人間パターン: ユーザーフローを解析して非人間パターン (「カートに追加」や「購入を完了」機能を一秒以内でアクセスしたユーザーなど) を検出します。
+
+
+  * Tor 出口ノードやよく知られたプロキシの IP アドレスをブロックすることを検討します。
+* マシンによって直接使用される API (開発者 API や B2B API など) へのアクセスを保護して制限します。これらは必要な保護メカニズムのすべてを実装してはいないことが多いため、攻撃者の格好のターゲットになる傾向があります。
 
 
 
