@@ -4,51 +4,51 @@ API9:2023 不適切なインベントリ管理 (Improper Inventory Management)
 | 脅威エージェント/攻撃手法 | セキュリティ上の弱点 | 影響 |
 | - | - | - |
 | API 依存 : 悪用難易度 **3** | 普及度 **3** : 検出難易度 **2** | 技術的影響 **2** : ビジネス依存 |
-| Threat agents usually get unauthorized access through old API versions or endpoints left running unpatched and  using weaker security requirements. Alternatively, they may get access to sensitive data through a 3rd party with whom there's no reason to share data with. | Outdated documentation makes it more difficult to find and/or fix vulnerabilities. Lack of assets inventory and retirement strategies leads to running unpatched systems, resulting in leakage of sensitive data. It's common to find unnecessarily exposed API hosts because of modern concepts like microservices, which make applications easy to deploy and independent (e.g. cloud computing, K8S). | Attackers can gain access to sensitive data, or even take over the server, through old, unpatched API versions connected to the same database. |
+| 脅威エージェントは一般的に古い API バージョンやパッチを適用せずに実行したままのエンドポイントを通じて、脆弱なセキュリティ要件を使用して不認可アクセスを行います。あるいは、データを共有する理由のないサードパーティを通じて機密データにアクセスすることもあります。 | ドキュメントが古いと脆弱性の発見や修正が難しくなります。資産インベントリやリタイアメント戦略がないと、パッチを適用していないシステムが稼働し、機密データの漏洩につながります。アプリケーションのデプロイを容易にし独立したものにする、マイクロサービスなどの最近のコンセプト (クラウドコンピューティング、K8S など) により、不必要に露出した API ホストを見つかることがよくあります。 | 攻撃者は同じデータベースに接続されたパッチを適用していない古い API バージョンを介して、機密データにアクセスしたり、サーバーを乗っ取ることすらできます。 |
 
 ## その API は脆弱か？
 
-The sprawled and connected nature of APIs and modern applications brings new challenges. 
-It is important for organizations not only to have a good understanding and visibility of their own APIs and API endpoints, but also how the APIs are storing or sharing data with external third parties.
+API と最近のアプリケーションのスプロールとコネクテッドの性質は新たな課題をもたらします。
+組織にとって重要なのは、自社の API と API エンドポイントを十分に理解して可視化するだけでなく、API がどのようにデータを保存したり、外部のサードパーティとデータを共有するかについても理解することです。
 
 
 
-Running multiple versions of an API requires additional management resources from the API provider and expands the attack surface.
+複数のバージョンの API を実行すると、API プロバイダから管理リソースを追加する必要があり、攻撃対象領域が拡大します。
 
 
-An API has a "<ins>documentation blindspot</ins>“ if:
+API には以下のような「<ins>ドキュメントの盲点</ins>」があるかもしれません。
 
-* The purpose of an API host is unclear, and there are no explicit answers to  the following questions
+* API ホストの目的が不明確であり、以下の質問に対する明確な答えがありません。
 
-  * Which environment is the API running in (e.g. production, staging, test,    development)?
+  * API はどの環境 (本番環境、ステージング環境、テスト環境、開発環境) で実行していますか？
 
-  * Who should have network access to the API (e.g. public, internal, partners)?
-  * Which API version is running?
-* There is no documentation or the existing documentation is not updated.
-* There is no retirement plan for each API version.
-* The host's inventory is missing or outdated.
+  * API へネットワークアクセスできるのは誰 (パブリック、内部、パートナーなど) ですか？
+  * どの API バージョンが動作していますか？
+* ドキュメントがないか、既存のドキュメントが更新されていません。
+* 各 API バージョンのリタイアメントプランがありません。
+* ホストのインベントリがないか、古くなっています。
 
-The visibility and inventory of sensitive data flows play an important role as part of an incident response plan, in case a breach happens on the third party side.
+サードパーティ側で侵害が発生した場合に備えて、機密データフローの可視性とインベントリはインシデント対応計画の一部として重要な役割を果たします。
 
 
 
-An API has a "<ins>data flow blindspot</ins>" if:
+API は以下のような「<ins>データフローの盲点</ins>」があるかもしれません。
 
-* There is a "sensitive data flow" where the API shares sensitive data with a   third party and
+* API が機密データをサードパーティと共有する「機密データフロー」がありますが、以下のような状況です。
 
-  * There is not a business justification or approval of the flow
-  * There is no inventory or visibility of the flow
-  * There is not deep visibility of which type of sensitive data is shared
+  * そのフローについてビジネス上の正当性や承認がありません。
+  * そのフローのインベントリや可視性がありません。
+  * どのような機密データが共有されているかを詳細に把握できません。
 
 
 ## 攻撃シナリオの例
 
 ### シナリオ #1
 
-A social network implemented a rate-limiting mechanism that blocks attackers from using brute force to guess reset password tokens. 
-This mechanism wasn't implemented as part of the API code itself but in a separate component between the client and the official API (www.socialnetwork.com). 
-A researcher found a beta API host (www.mbasic.beta.socialnetwork.com) that runs the same API, including the reset password mechanism, but the rate-limiting mechanism was not in place. 
-The researcher was able to reset the password of any user by using simple brute force to guess the 6 digit token.
+あるソーシャルネットワークでは攻撃者がブルートフォースを使用してリセットパスワードトークンを推測することをブロックするレート制限メカニズムを実装しました。
+このメカニズムは API コード自体の一部としてではなく、クライアントと公式 API (www.socialnetwork.com) との間にある別のコンポーネントに実装されました。
+ある研究者はリセットパスワードメカニズムを含む同じ API を実行するベータ API ホスト (www.mbasic.beta.socialnetwork.com) を見つけましたが、レート制限メカニズムはありませんでした。
+この研究者は単純なブルートフォースを使用して 6 桁のトークンを推測することで、任意のユーザーのパスワードをリセットできました。
 
 
 
@@ -56,41 +56,41 @@ The researcher was able to reset the password of any user by using simple brute 
 
 ### シナリオ #2
 
-A social network allows developers of independent apps to integrate with it. 
-As part of this process a consent is requested from the end user, so the social network can share the user's personal information with the independent app.
+あるソーシャルネットワークでは独立系アプリの開発者がそのソーシャルネットワークと統合できます。
+このプロセスの一環として、エンドユーザーからの同意が要求され、このソーシャルネットワークはユーザーの個人情報を独立系アプリと共有できます。
 
 
-The data flow between the social network and the independent apps is not restrictive or monitored enough, allowing independent apps to access not only the user information but also the private information of all of their friends. 
+ソーシャルネットワークと独立系アプリの間のデータフローは制限や監視が十分ではないため、独立系アプリはユーザー情報だけでなく、その友人すべての個人情報にもアクセスできます。
 
 
 
-A consulting firm builds a malicious app and manages to get the consent of 270,000 users. 
-Because of the flaw, the consulting firm manages to get access to the private information of 50,000,000 users. 
-Later, the consulting firm sells the information for malicious purposes.
+あるコンサルティング会社が悪意のあるアプリを作成し、270,000 ユーザーの同意を得ることができました。
+この欠陥により、コンサルティング会社は 50,000,000 ユーザーの個人情報にアクセスできました。
+その後、コンサルティング会社はこの情報を悪意のある目的で販売します。
 
 
 ## 防止方法
 
-* Inventory all <ins>API hosts</ins> and document important aspects of each one   of them, focusing on the API environment (e.g. production, staging, test,   development), who should have network access to the host (e.g. public,   internal, partners) and the API version.
+* すべての <ins>API ホスト</ins> のインベントリを作成し、API 環境 (本番環境、ステージング環境、テスト環境、開発環境など) 、ホストへネットワークアクセスできる人 (パブリック、内部、パートナーなど) 、API バージョンに焦点を当てて、それら各々について重要な側面を文書化します。
 
 
 
-* Inventory <ins>integrated services</ins> and document important aspects such  as their role in the system, what data is exchanged (data flow), and their  sensitivity.
+* <ins>統合されたサービス</ins> のインベントリを作成し、システムの役割、交換されるデータ (データフロー) 、それらの機密性などの重要な側面を文書化します。
 
 
-* Document all aspects of your API such as authentication, errors, redirects,  rate limiting, cross-origin resource sharing (CORS) policy, and endpoints,  including their parameters, requests, and responses.
+* 認証、エラー、リダイレクト、レート制限、クロスオリジンリソース共有 (CORS) ポリシー、エンドポイントなどの API のすべての側面を、パラメータ、リクエスト、レスポンスを含めて文書化します。
 
 
-* Generate documentation automatically by adopting open standards. Include the  documentation build in your CI/CD pipeline.
+* オープンスタンダードを採用してドキュメントを自動的に生成します。CI/CD パイプラインにドキュメントビルドを含めます。
 
-* Make API documentation available only to those authorized to use the API.
-* Use external protection measures such as API security specific solutions for  all exposed versions of your APIs, not just for the current production  version.
-
-
-* Avoid using production data with non-production API deployments. If this is  unavoidable, these endpoints should get the same security treatment as the  production ones.
+* API ドキュメントは API の使用を認可された者のみが利用できるようにします。
+* 現在の本番バージョンだけでなく、API のすべての公開バージョンに対して、API セキュリティに特化したソリューションなどの外部保護手段を使用します。
 
 
-* When newer versions of APIs include security improvements, perform a risk  analysis to inform the mitigation actions required for the older versions.  For example, whether it is possible to backport the improvements without  breaking API compatibility or if you need to take the older version out  quickly and force all clients to move to the latest version.
+* 本番以外の API デプロイメントで本番データを使用することは避けます。やむを得ない場合には、これらのエンドポイントには本番環境と同じセキュリティ処置を施す必要があります。
+
+
+* 新しいバージョンの API にセキュリティの改善が含まれている場合には、リスク分析を実施し、古いバージョンに必要な緩和策を通知します。たとえば、API の互換性を損なうことなくその改善をバックポートできるかどうか、古いバージョンを速やかに削除してすべてのクライアントを強制的に最新バージョンに移行する必要があるかどうかなどです。
 
 
 
