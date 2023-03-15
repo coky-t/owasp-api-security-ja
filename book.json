@@ -3,7 +3,7 @@
   "plugins" : [ "anchors" ],
 
   "structure": {
-    "readme": "SUMMARY.md"
+    "readme": "README.md"
   }
 
 }
