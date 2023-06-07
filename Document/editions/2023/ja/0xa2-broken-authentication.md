@@ -1,44 +1,44 @@
-# API2:2023 Broken Authentication
+# API2:2023 認証の不備 (Broken Authentication)
 
-| Threat agents/Attack vectors | Security Weakness | Impacts |
+| 脅威エージェント/攻撃手法 | セキュリティ上の弱点 | 影響 |
 | - | - | - |
-| API Specific : Exploitability **Easy** | Prevalence **Common** : Detectability **Easy** | Technical **Severe** : Business Specific |
-| The authentication mechanism is an easy target for attackers since it's exposed to everyone. Although more advanced technical skills may be required to exploit some authentication issues, exploitation tools are generally available. | Software and security engineers’ misconceptions regarding authentication boundaries and inherent implementation complexity make authentication issues prevalent. Methodologies of detecting broken authentication are available and easy to create. | Attackers can gain complete control of other users’ accounts in the system, read their personal data, and perform sensitive actions on their behalf. Systems are unlikely to be able to distinguish attackers’ actions from legitimate user ones. |
+| API 依存 : 悪用難易度 **容易** | 普及度 **普通** : 検出難易度 **容易** | 技術的影響 **重度** : ビジネス依存 |
+| 認証メカニズムはすべての人に公開されているため、攻撃者にとって格好の標的となります。認証の問題によっては悪用するためにより高度な技術スキルが必要になることもありますが、エクスプロイトツールは一般的に入手可能です。 | 認証境界や固有の実装の複雑さに関するソフトウェアおよびセキュリティのエンジニアの誤解が認証の問題を蔓延させています。認証の不備を検出する方法論は利用可能であり、作成も簡単です。 | 攻撃者はシステム内の他のユーザーのアカウントを完全に制御し、ユーザーの個人データを読み取り、ユーザーに代わって機密性の高いアクションを実行できます。システムは攻撃者のアクションと正当なユーザーのアクションを区別できそうにありません。 |
 
-## Is the API Vulnerable?
+## その API は脆弱か？
 
-Authentication endpoints and flows are assets that need to be protected.
-Additionally, "Forgot password / reset password" should be treated the same way
-as authentication mechanisms.
+認証エンドポイントとフローは保護する必要がある資産です。
+さらに、「パスワード忘れ/パスワードリセット」も認証メカニズムと同様に扱う必要があります。
 
-An API is vulnerable if it:
 
-* Permits credential stuffing where the attacker uses brute force with a list
-  of valid usernames and passwords.
-* Permits attackers to perform a brute force attack on the same user account,
-  without presenting captcha/account lockout mechanism.
-* Permits weak passwords.
-* Sends sensitive authentication details, such as auth tokens and passwords in
-  the URL.
-* Allows users to change their email address, current password, or do any other
-  sensitive operations without asking for password confirmation.
-* Doesn't validate the authenticity of tokens.
-* Accepts unsigned/weakly signed JWT tokens (`{"alg":"none"}`)
-* Doesn't validate the JWT expiration date.
-* Uses plain text, non-encrypted, or weakly hashed passwords.
-* Uses weak encryption keys.
+API は以下のような場合に脆弱となります。
 
-On top of that, a microservice is vulnerable if:
+* 攻撃者が有効なユーザー名とパスワードのリストでブルートフォースを行うクレデンシャルスタッフィングを許可している場合。
 
-* Other microservices can access it without authentication
-* Uses weak or predictable tokens to enforce authentication
+* CAPTCHA やアカウントロックアウトメカニズムを提示することなく、攻撃者が同じユーザーアカウントでブルートフォース攻撃を実行することを許可している場合。
 
-## Example Attack Scenarios
+* 弱いパスワードを許可している場合。
+* URL 内の認証トークンやパスワードなど、機密性の高い認証情報を送信している場合。
 
-## Scenario #1
+* パスワードの確認を求めることなく、ユーザーが電子メールアドレスや現在のパスワードを変更したり、その他の任意の機密性の高い操作を行うことができる場合。
 
-In order to perform user authentication the client has to issue an API request
-like the one below with the user credentials:
+* トークンの真正性を検証していない場合。
+* 未署名や弱い署名の JWT トークン (`{"alg":"none"}`) を受け入れる場合。
+* JWT の有効期限を検証していない場合。
+* パスワードをプレーンテキストか、暗号化されていないか、弱いハッシュ化で使用している場合。
+* 弱い暗号化鍵を使用している場合。
+
+そのうえで、マイクロサービスは以下のような場合に脆弱となります。
+
+* 他のマイクロサービスが認証なしでアクセスできる場合。
+* 弱いトークンや予測可能なトークンを使用して認証を実施している場合。
+
+## 攻撃シナリオの例
+
+## シナリオ #1
+
+ユーザー認証を行うために、クライアントはユーザー認証情報とともに以下のような API リクエストを発行する必要があります。
+
 
 ```
 POST /graphql
@@ -51,13 +51,13 @@ POST /graphql
 }
 ```
 
-If credentials are valid, then an auth token is returned which should be
-provided in subsequent requests to identify the user. Login attempts are
-subject to restrictive rate limiting: only three requests are allowed per
-minute.
+認証情報が有効な場合、認証トークンが返されます。この認証トークンはユーザーを識別するためにその後のリクエストで提供される必要があります。
+ログイン試行は回数制限があり、リクエストは一分間に三回までしかできません。
 
-To brute force log in with a victim's account, bad actors leverage GraphQL
-query batching to bypass the request rate limiting, speeding up the attack:
+
+
+被害者のアカウントでログインをブルートフォースするために、攻撃者は GraphQL クエリのバッチ処理を利用してリクエストの回数制限を回避し、攻撃を高速化します。
+
 
 ```
 POST /graphql
@@ -70,10 +70,10 @@ POST /graphql
 ]
 ```
 
-## Scenario #2
+## シナリオ #2
 
-In order to update the email address associated with a user's account, clients
-should issue an API request like the one below:
+ユーザーのアカウントに関連付けられている電子メールアドレスを更新するために、クライアントは以下のような API リクエストを発行する必要があります。
+
 
 ```
 PUT /account
@@ -82,37 +82,37 @@ Authorization: Bearer <token>
 { "email": "<new_email_address>" }
 ```
 
-Because the API does not require users to confirm their identity by providing
-their current password, bad actors able to put themselves in a position to
-steal the auth token might be able to take over the victim's account by starting
-the reset password workflow after updating the email address of the victim's
-account.
+この API では現在のパスワードを提供して本人であることを確認することをユーザーに要求しないため、攻撃者は認証トークンを盗むことができます。被害者のアカウントの電子メールアドレスを更新した後にパスワードリセットのワークフローを開始することで、被害者のアカウントを乗っ取ることができるかもしれません。
 
-## How To Prevent
 
-* Make sure you know all the possible flows to authenticate to the API
-  (mobile/ web/deep links that implement one-click authentication/etc.). Ask
-  your engineers what flows you missed.
-* Read about your authentication mechanisms. Make sure you understand what and
-  how they are used. OAuth is not authentication, and neither are API keys.
-* Don't reinvent the wheel in authentication, token generation, or password
-  storage. Use the standards.
-* Credential recovery/forgot password endpoints should be treated as login
-  endpoints in terms of brute force, rate limiting, and lockout protections.
-* Require re-authentication for sensitive operations (e.g. changing the account
-  owner email address/2FA phone number).
-* Use the [OWASP Authentication Cheatsheet][1].
-* Where possible, implement multi-factor authentication.
-* Implement anti-brute force mechanisms to mitigate credential stuffing,
-  dictionary attacks, and brute force attacks on your authentication endpoints.
-  This mechanism should be stricter than the regular rate limiting mechanisms
-  on your APIs.
-* Implement [account lockout][2]/captcha mechanisms to prevent brute force
-  attacks against specific users. Implement weak-password checks.
-* API keys should not be used for user authentication. They should only be used
-  for [API clients][3] authentication.
 
-## References
+
+
+## 防止方法
+
+* API への認証に使用できるすべてのフロー (ワンクリック認証を実装したモバイル/ウェブ/ディープリンクなど) を確認します。あなたがどのフローを見逃したかエンジニアに尋ねてください。
+
+
+* 認証メカニズムについて読みます。何がどのように使用されているかを理解しましょう。OAuth は認証ではありませんし、API キーも違います。
+
+* 認証、トークン生成、パスワード保存において車輪の再発明をしてはいけません。標準規格を使用しましょう。
+
+* 認証情報リカバリやパスワード忘れのエンドポイントはブルートフォース、回数制限、ロックアウト保護の観点からログインエンドポイントとして扱う必要があります。
+
+* 機密性の高い操作 (アカウント所有者の電子メールアドレスや二要素認証電話番号の変更など) には再認証を要求します。
+
+* [OWASP Authentication Cheatsheet][1] を使用します。
+* 可能であれば、多要素認証を実装します。
+* 認証エンドポイントでのクレデンシャルスタッフィング、辞書攻撃、ブルートフォース攻撃を軽減するためにアンチブルートフォースメカニズムを実装します。このメカニズムは API の通常の回数制限メカニズムよりも厳しいものにすべきです。
+
+
+
+* 特定のユーザーに対するブルートフォース攻撃を防ぐために [アカウントロックアウト][2] や CAPTCHA のメカニズムを実装します。弱いパスワードのチェックを実装します。
+
+* API キーはユーザー認証に使用すべきではありません。 [API クライアント][3] 認証にのみ使用すべきです。
+
+
+## 参考資料
 
 ### OWASP
 
@@ -120,7 +120,7 @@ account.
 * [Key Management Cheat Sheet][4]
 * [Credential Stuffing][5]
 
-### External
+### その他
 
 * [CWE-204: Observable Response Discrepancy][6]
 * [CWE-307: Improper Restriction of Excessive Authentication Attempts][7]
