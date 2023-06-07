@@ -1,5 +1,4 @@
-OWASP API セキュリティ Top 10
-=============================
+# OWASP API セキュリティ Top 10
 
 このプロジェクトはソフトウェア製品の一部として潜在的に機密性の高い API をデプロイしている、増え続ける組織に対応するように設計されています。
 これたの API は内部タスクやサードパーティとのインタフェースに使用されます。
@@ -40,7 +39,7 @@ OWASP API セキュリティプロジェクトはセキュアでない API の�
 
 **OWASP API セキュリティプロジェクトドキュメントは自由に使用できます！**
 
-OWASP API セキュリティプロジェクトは [Creative Commons Attribution-ShareAlike 3.0 license][1] のもとでライセンスされていますので、本著作物を複製、配布、送信することが可能です。
+OWASP API セキュリティプロジェクトは [Creative Commons Attribution-ShareAlike 4.0 license][1] のもとでライセンスされていますので、本著作物を複製、配布、送信することが可能です。
 また、著作物の帰属表示をする限り、変更することや商業的に利用することも可能です。本著作物を改変、変形、拡張する場合、結果として生じる著作物を本著作物と同一または類似のライセンスのもとでのみ配布することができます。
 
 
@@ -48,7 +47,7 @@ OWASP API セキュリティプロジェクトは [Creative Commons Attribution-
 
 
 [0]: https://www.owasp.org/index.php/User:ErezYalon
-[1]: http://creativecommons.org/licenses/by-sa/3.0/
+[1]: http://creativecommons.org/licenses/by-sa/4.0/
 [2]: https://github.com/OWASP/API-Security/blob/develop/2019/en/dist/owasp-api-security-top-10.pdf
 [3]: https://github.com/OWASP/API-Security/tree/develop/
 [4]: https://github.com/OWASP/API-Security/blob/master/CONTRIBUTING.md
