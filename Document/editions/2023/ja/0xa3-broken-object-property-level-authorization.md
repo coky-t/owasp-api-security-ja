@@ -1,32 +1,32 @@
-# API3:2023 Broken Object Property Level Authorization
+# API3:2023 オブジェクトプロパティレベル認可の不備 (Broken Object Property Level Authorization)
 
-| Threat agents/Attack vectors | Security Weakness | Impacts |
+| 脅威エージェント/攻撃手法 | セキュリティ上の弱点 | 影響 |
 | - | - | - |
-| API Specific : Exploitability **Easy** | Prevalence **Common** : Detectability **Easy** | Technical **Moderate** : Business Specific |
-| APIs tend to expose endpoints that return all object’s properties. This is particularly valid for REST APIs. For other protocols such as GraphQL, it may require crafted requests to specify which properties should be returned. Identifying these additional properties that can be manipulated requires more effort, but there are a few automated tools available to assist in this task. | Inspecting API responses is enough to identify sensitive information in returned objects’ representations. Fuzzing is usually used to identify additional (hidden) properties. Whether they can be changed is a matter of crafting an API request and analyzing the response. Side-effect analysis may be required if the target property is not returned in the API response. | Unauthorized access to private/sensitive object properties may result in data disclosure, data loss, or data corruption. Under certain circumstances, unauthorized access to object properties can lead to privilege escalation or partial/full account takeover. |
+| API 依存 : 悪用難易度 **容易** | 普及度 **普通** : 検出難易度 **容易** | 技術的影響 **中程度** : ビジネス依存 |
+| API はすべてのオブジェクトのプロパティを返すエンドポイントを公開する傾向にあります。これは特に REST API に当てはまります。GraphQL などの他のプロトコルでは、返すべきプロパティを指定するために、リクエストに細工が必要となることもあります。操作可能なこれらの追加プロパティを特定するには、より多くの労力が必要ですが、このタスクを支援する自動化ツールがいくつかあります。 | API レスポンスを検査するだけで、返されたオブジェクトの表現内の機密情報を特定できます。ファジングは追加の (隠された) プロパティを特定するためによく使用されます。それらを変更できるかどうかは、API リクエストを作成し、そのレスポンスを解析することでわかります。ターゲットプロパティが API レスポンスで返されない場合、サイドエフェクト解析が必要になるかもしれません。 | プライベートオブジェクトや機密オブジェクトに不認可アクセスすると、データ開示、データ損失、データ破損を引き起こす可能性があります。特定の条件下では、オブジェクトプロパティへの不認可アクセスにより、権限昇格やアカウントの部分的または完全な乗っ取りにつながる可能性があります。 |
 
-## Is the API Vulnerable?
+## その API は脆弱か？
 
-When allowing a user to access an object using an API endpoint, it is important
-to validate that the user has access to the specific object properties they are
-trying to access.
+ユーザーが API エンドポイントを使用してオブジェクトにアクセスできるようにする場合、ユーザーがアクセスしようとしている特定のオブジェクトプロパティにアクセスする許可を持っているかどうかを検証することが重要です。
 
-An API endpoint is vulnerable if:
 
-* The API endpoint exposes properties of an object that are considered
-  sensitive and should not be read by the user. (previously named: "[Excessive
-  Data Exposure][1]")
-* The API endpoint allows a user to change, add/or delete the value of a
-  sensitive object's property which the user should not be able to access
-  (previously named: "[Mass Assignment][2]")
 
-## Example Attack Scenarios
+API エンドポイントは以下のような場合に脆弱となります。
 
-### Scenario #1
+* API エンドポイントは機密性が高くユーザーが読み取ってはいけないオブジェクトのプロパティを露出している場合。 (以前の名称: "[過剰なデータ露出 (Excessive Data Exposure)][1]")
 
-A dating app allows a user to report other users for inappropriate behavior.
-As part of this flow, the user clicks on a "report" button, and the following
-API call is triggered:
+
+* API エンドポイントはユーザーがアクセスできないはずの機密性の高いオブジェクトのプロパティの値を変更、追加、削除できる場合。 (以前の名称: "[一括割り当て (Mass Assignment)][2]")
+
+
+
+## 攻撃シナリオの例
+
+### シナリオ #1
+
+ある出会い系アプリではユーザーが他のユーザーの不適切な振る舞いを報告できます。
+このフローの一環として、ユーザーは「報告」ボタンをクリックし、以下のような API コールがトリガーされます。
+
 
 ```
 POST /graphql
@@ -50,18 +50,18 @@ POST /graphql
 }
 ```
 
-The API Endpoint is vulnerable since it allows the authenticated user to have
-access to sensitive (reported) user object properties, such as "fullName" and
-"recentLocation" that are not supposed to be accessed by other users.
+認証済みユーザーが "fullName" や "recentLocation" などの他のユーザーがアクセスすることを想定していない機密性の高い (レポートされる) ユーザーオブジェクトプロパティにアクセスできるため、この API エンドポイントは脆弱です。
 
-### Scenario #2
 
-An online marketplace platform, that offers one type of users ("hosts") to rent
-out their apartment to another type of users ("guests"), requires the host to
-accept a booking made by a guest, before charging the guest for the stay.
 
-As part of this flow, an API call is sent by the host to
-`POST /api/host/approve_booking` with the following legitimate payload:
+### シナリオ #2
+
+あるタイプのユーザー (「ホスト」) が別のタイプのユーザー (「ゲスト」) に自分のアパートの貸し出しを提供するオンラインマーケットプレイスプラットフォームでは、ゲストに宿泊料金を請求する前に、ホストがゲストによる予約を受け入れることを要求されます。
+
+
+
+このフローの一環として、ホストによって API コールが `POST /api/host/approve_booking` に以下の正当なペイロードで送信されます。
+
 
 ```
 {
@@ -70,8 +70,8 @@ As part of this flow, an API call is sent by the host to
 }
 ```
 
-The host replays the legitimate request, and adds the following malicious
-payload:
+ホストはこの正当なリクエストをリプレイして、以下の悪意のあるペイロードを追加します。
+
 
 ```
 {
@@ -81,15 +81,15 @@ payload:
 }
 ```
 
-The API endpoint is vulnerable because there is no validation that the host
-should have access to the internal object property - `total_stay_price`, and
-the guest will be charged more than she was supposed to be.
+ホストが内部オブジェクトプロパティ `total_stay_price` にアクセスする許可を持っているか検証していないので、この API エンドポイント脆弱です。そして、ゲストは想定よりも多く請求されることになります。
+
+
 
 ### Scenario #3
 
-A social network that is based on short videos, enforces restrictive content
-filtering and censorship. Even if an uploaded video is blocked, the user can
-change the description of the video using the following API request:
+ショート動画をベースとしたソーシャルネットワークでは制限的なコンテンツフィルタリングと検閲を実施しています。
+アップロードされた動画がブロックされても、ユーザーは以下の API リクエストを使用して動画の説明を変更できます。
+
 
 ```
 PUT /api/video/update_video
@@ -99,8 +99,8 @@ PUT /api/video/update_video
 }
 ```
 
-A frustrated user can replay the legitimate request, and add the following
-malicious payload:
+イライラしたユーザーは正当なリクエストをリプレイして、以下の悪意のあるペイロードを追加します。
+
 
 ```
 {
@@ -109,29 +109,29 @@ malicious payload:
 }
 ```
 
-The API endpoint is vulnerable because there is no validation if the user
-should have access to the internal object property - `blocked`, and the user
-can change the value from `true` to `false` and unlock their own blocked
-content.
+ユーザーが内部オブジェクトプロパティ `blocked` にアクセスする許可を持っているか検証していないので、この API エンドポイント脆弱です。そして、ユーザーはその値を `true` から `false` に変更し、自身のブロックされたコンテンツをアンロックできます。
 
-## How To Prevent
 
-* When exposing an object using an API endpoint, always make sure that the user
-  should have access to the object's properties you expose.
-* Avoid using generic methods such as `to_json()` and `to_string()`. Instead,
-  cherry-pick specific object properties you specifically want to return.
-* If possible, avoid using functions that automatically bind a client's input
-  into code variables, internal objects, or object properties
-  ("Mass Assignment").
-* Allow changes only to the object's properties that should be updated by the
-  client.
-* Implement a schema-based response validation mechanism as an extra layer of
-  security. As part of this mechanism, define and enforce data returned by all
-  API methods.
-* Keep returned data structures to the bare minimum, according to the
-  business/functional requirements for the endpoint.
 
-## References
+
+## 防止方法
+
+* API エンドポイントを使用してオブジェクトを開示する場合、開示するオブジェクトのプロパティにアクセスする許可をユーザーが持っていることを常に確認します。
+
+* `to_json()` や `to_string()` などの汎用的なメソッドの使用は避けます。
+  代わりに、具体的に返したい特定のオブジェクトプロパティを厳選します。
+* 可能であれば、クライアントの入力をコード変数、内部オブジェクト、オブジェクトプロパティに自動的にバインド ("Mass Assignment") する関数の使用は避けます。
+
+
+* クライアントが更新すべきオブジェクトのプロパティのみ変更できるようにします。
+
+* スキーマベースのレスポンス検証メカニズムを実装して、セキュリティの層を増やします。このメカニズムの一環として、すべての API メソッドによって返されるデータを定義して適用します。
+
+
+* エンドポイントのビジネス要件や機能要件に従って、返されるデータ構造を必要最小限に抑えます。
+
+
+## 参考資料
 
 ### OWASP
 
