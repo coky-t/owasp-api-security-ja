@@ -1,40 +1,40 @@
-# API4:2023 Unrestricted Resource Consumption
+# API4:2023 制限のないリソース消費 (Unrestricted Resource Consumption)
 
-| Threat agents/Attack vectors | Security Weakness | Impacts |
+| 脅威エージェント/攻撃手法 | セキュリティ上の弱点 | 影響 |
 | - | - | - |
-| API Specific : Exploitability **Average** | Prevalence **Widespread** : Detectability **Easy** | Technical **Severe** : Business Specific |
-| Exploitation requires simple API requests. Multiple concurrent requests can be performed from a single local computer or by using cloud computing resources. Most of the automated tools available are designed to cause DoS via high loads of traffic, impacting APIs’ service rate. | It's common to find APIs that do not limit client interactions or resource consumption. Crafted API requests, such as those including parameters that control the number of resources to be returned and performing response status/time/length analysis should allow identification of the issue. The same is valid for batched operations. Although threat agents don't have visibility over costs impact, this can be inferred based on service providers’ (e.g. cloud provider) business/pricing model. | Exploitation can lead to DoS due to resource starvation, but it can also lead to operational costs increase such as those related to the infrastructure due to higher CPU demand, increasing cloud storage needs, etc. |
+| API 依存 : 悪用難易度 **平均的** | 普及度 **広範** : 検出難易度 **容易** | 技術的影響 **重度** : ビジネス依存 |
+| 悪用にはシンプルな API リクエストを必要とします。複数の同時リクエストは単一のローカルコンピュータから、またはクラウドコンピューティングリソースを使用することで実行できます。利用可能な自動化ツールのほとんどは高負荷のトラフィックによって DoS を引き起こし、API のサービスレートに影響するように設計されています。 | クライアントとのインタラクションやリソース消費を制限しない API を見かけることはよくあります。返されるリソース数を制御するパラメータを含む API リクエストや、レスポンスのステータス、タイム、長さの解析実行など、細工された API リクエストにより、問題を特定できるはずです。同じことがバッチ操作にも当てはまります。脅威エージェントはコストへの影響を可視化できませんが、これはサービスプロバイダ (クラウドプロバイダなど) のビジネスモデルや価格モデルに基づいて推測できます。 | 悪用することでリソース枯渇による DoS につながる可能性があるだけでなく、CPU 需要の上昇やクラウドストレージのニーズの増加などにより、インフラストラクチャ関連などの運用コストの増加につながる可能性もあります。 |
 
-## Is the API Vulnerable?
+## その API は脆弱か？
 
-Satisfying API requests requires resources such as network bandwidth, CPU,
-memory, and storage. Sometimes required resources are made available by service
-providers via API integrations, and paid for per request, such as sending
-emails/SMS/phone calls, biometrics validation, etc.
+API リクエストを満たすにはネットワーク帯域幅、CPU、メモリ、ストレージなどのリソースが必要です。必要なリソースはサービスプロバイダが API 統合によって利用可能になり、電子メール、SMS、電話コールの送信や生体認証での検証など、リクエストごとに料金を支払うこともあります。
 
-An API is vulnerable if at least one of the following limits is missing or set
-inappropriately (e.g. too low/high):
 
-* Execution timeouts
-* Maximum allocable memory
-* Maximum number of file descriptors
-* Maximum number of processes
-* Maximum upload file size
-* Number of operations to perform in a single API client request (e.g. GraphQL
-  batching)
-* Number of records per page to return in a single request-response
-* Third-party service providers' spending limit
 
-## Example Attack Scenarios
 
-### Scenario #1
+以下の制限のうち一つでも欠落していたり不適切に設定されている (低すぎる、高すぎるなど) 場合、API は脆弱となります。
 
-A social network implemented a “forgot password” flow using SMS verification,
-enabling the user to receive a one time token via SMS in order to reset their
-password.
 
-Once a user clicks on "forgot password" an API call is sent from the user's
-browser to the back-end API:
+* 実行タイムアウト
+* 最大割り当てメモリ
+* ファイルディスクリプタの最大数
+* プロセスの最大数
+* 最大アップロードファイルサイズ
+* 一回の API クライアントリクエストで実行するオペレーション数 (GraphQL バッチ処理など)
+
+* 一回のリクエスト・レスポンスで返せるページごとのレコード数
+* サードパーティサービスプロバイダの利用限度額
+
+## 攻撃シナリオの例
+
+### シナリオ #1
+
+あるソーシャルネットワークは SMS 認証を利用した「パスワードを忘れた場合」フローを実装し、ユーザーがパスワードをリセットするために SMS 経由でワンタイムトークンを受信できるようにしました。
+
+
+
+ユーザーが「パスワードを忘れた場合」をクリックすると、API コールがユーザーのブラウザからバックエンド API に送信されます。
+
 
 ```
 POST /initiate_forgot_password
@@ -45,8 +45,8 @@ POST /initiate_forgot_password
 }
 ```
 
-Then, behind the scenes, an API call is sent from the back-end to a 3rd party
-API that takes care of the SMS delivering:
+そして、裏側では、API コールがバックエンドから SMS のデリバリを担当するサードパーティ API に送信されます。
+
 
 ```
 POST /sms/send_reset_pass_code
@@ -58,16 +58,16 @@ Host: willyo.net
 }
 ```
 
-The 3rd party provider, Willyo, charges $0.05 per this type of call.
+サードパーティプロバイダ Willyo はこのタイプのコールごとに 0.05 ドルを請求します。
 
-An attacker writes a script that sends the first API call tens of thousands of
-times. The back-end follows and requests Willyo to send tens of thousands of
-text messages, leading the company to lose thousands of dollars in a matter of
-minutes.
+攻撃者は最初の API コールを何万回も送信するスクリプトを作成します。
+バックエンドはこれに続き Willyo に数万のテキストメッセージの送信を要求し、同社は数分で数千ドルを失うことになります。
 
-### Scenario #2
 
-A GraphQL API Endpoint allows the user to upload a profile picture.
+
+### シナリオ #2
+
+ある GraphQL API エンドポイントではユーザーがプロフィール画像をアップロードできます。
 
 ```
 POST /graphql
@@ -81,17 +81,17 @@ POST /graphql
 }
 ```
 
-Once the upload is complete, the API generates multiple thumbnails with
-different sizes based on the uploaded picture. This graphical operation takes a
-lot of memory from the server.
+アップロードが完了すると、API はアップロードされた画像をもとにさまざまなサイズの複数のサムネールを生成します。
+この画像操作にはサーバーから多くのメモリを取得します。
 
-The API implements a traditional rate limiting protection - a user can't access
-the GraphQL endpoint too many times in a short period of time. The API also
-checks for the uploaded picture's size before generating thumbnails to avoid
-processing pictures that are too large.
 
-An attacker can easily bypass those mechanisms, by leveraging the flexible
-nature of GraphQL:
+API は従来のレート制限保護を実装しています。ユーザーは短期間に何度も GraphQL エンドポイントにアクセスできません。
+また API はサムネールを生成する前にアップロードされた画像のサイズをチェックし、大きすぎる画像の処理を避けます。
+
+
+
+攻撃者は GraphQL の柔軟な性質を利用して、これらのメカニズムを簡単にバイパスできます。
+
 
 ```
 POST /graphql
@@ -104,47 +104,47 @@ POST /graphql
 }
 ```
 
-Because the API does not limit the number of times the `uploadPic` operation can
-be attempted, the call will lead to exhaustion of server memory and Denial of
-Service.
+API は `uploadPic` オペレーションの試行回数を制限していないため、このコールはサーバーメモリの枯渇とサービス拒否につながります。
 
-### Scenario #3
 
-A service provider allows clients to download arbitrarily large files using its
-API. These files are stored in cloud object storage and they don't change that
-often. The service provider relies on a cache service to have a better service
-rate and to keep bandwidth consumption low. The cache service only caches files
-up to 15GB.
 
-When one of the files gets updated, its size increases to 18GB. All service
-clients immediately start pulling the new version. Because there were no
-consumption cost alerts, nor a maximum cost allowance for the cloud service,
-the next monthly bill increases from US$13, on average, to US$8k.
+### シナリオ #3
 
-## How To Prevent
+サービスプロバイダはクライアントが API を使用して任意の大きさのファイルをダウンロードできるようにします。
+これらのファイルはクラウドオブジェクトストレージに保存され、それほど頻繁に変更されることはありません。
+このサービスプロバイダはサービスレートを向上させ、帯域幅の消費を低く抑えるために、キャッシュサービスに依存しています。
+このキャッシュサービスは 15GB までのファイルしかキャッシュしません。
 
-* Use a solution that makes it easy to limit [memory][1],
-  [CPU][2], [number of restarts][3], [file descriptors, and processes][4] such
-  as Containers / Serverless code (e.g. Lambdas).
-* Define and enforce a maximum size of data on all incoming parameters and
-  payloads, such as maximum length for strings, maximum number of elements in
-  arrays, and maximum upload file size (regardless of whether it is stored
-  locally or in cloud storage).
-* Implement a limit on how often a client can interact with the API within a
-  defined timeframe (rate limiting).
-* Rate limiting should be fine tuned based on the business needs. Some API
-  Endpoints might require stricter policies.
-* Limit/throttle how many times or how often a single API client/user can
-  execute a single operation (e.g. validate an OTP, or request password
-  recovery without visiting the one-time URL).
-* Add proper server-side validation for query string and request body
-  parameters, specifically the one that controls the number of records to be
-  returned in the response.
-* Configure spending limits for all service providers/API integrations. When
-  setting spending limits is not possible, billing alerts should be configured
-  instead.
 
-## References
+ファイルの一つが更新されると、そのサイズは 18GB に増加します。
+すべてのサービスクライアントはすぐに新しいバージョンの取得を開始します。
+このクラウドサービスには消費コストアラートも最大コスト許容値もなかったため、翌月の請求額は平均で 13 米ドルから 8000 米ドルに増加しました。
+
+
+## 防止方法
+
+* コンテナやサーバーレスコード (Lambdas など) のような [メモリ][1]、[CPU][2]、[再起動回数][3]、[ファイルディスクリプタ、プロセス][4] を簡単に制限できるソリューションを使用します。
+
+
+* 文字列の最大長、配列の最大要素数、アップロードファイルの最大サイズ (保存がローカルかクラウドストレージかに関係なく) など、受信するすべてのパラメータとペイロードのデータサイズの最大値を定義して適用します。
+
+
+
+* 定義された時間枠内でクライアントが API とやり取りできる回数に制限 (レート制限) を実装します。
+
+* レート制限はビジネスニーズに基づいて微調整する必要があります。API エンドポイントによっては、より厳格なポリシーが必要になることもあります。
+
+* 一つの API クライアントやユーザーが一つのオペレーション (OTP の検証や、ワンタイム URL をアクセスせずにパスワードリカバリをリクエストするなど) を実行できる回数や頻度を制限や調整します。
+
+
+* クエリ文字列とリクエストボディパラメータ、特にレスポンスで返されるレコード数を制御するものに対して、適切なサーバーサイドの検証を追加します。
+
+
+* すべてのサービスプロバイダや API 統合に対して支出制限を設定します。支出制限を設定できない場合には、代わりに課金アラートを設定すべきです。
+
+
+
+## 参考資料
 
 ### OWASP
 
@@ -152,13 +152,13 @@ the next monthly bill increases from US$13, on average, to US$8k.
 * ["DoS Prevention" - GraphQL Cheat Sheet][6]
 * ["Mitigating Batching Attacks" - GraphQL Cheat Sheet][7]
 
-### External
+### その他
 
 * [CWE-770: Allocation of Resources Without Limits or Throttling][8]
 * [CWE-400: Uncontrolled Resource Consumption][9]
 * [CWE-799: Improper Control of Interaction Frequency][10]
-* "Rate Limiting (Throttling)" - [Security Strategies for Microservices-based
-  Application Systems][11], NIST
+* "Rate Limiting (Throttling)" - [Security Strategies for Microservices-based Application Systems][11], NIST
+
 
 [1]: https://docs.docker.com/config/containers/resource_constraints/#memory
 [2]: https://docs.docker.com/config/containers/resource_constraints/#cpu
