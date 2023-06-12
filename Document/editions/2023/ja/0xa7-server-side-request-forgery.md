@@ -1,41 +1,41 @@
-# API7:2023 Server Side Request Forgery
+# API7:2023 サーバーサイドリクエストフォージェリ (Server Side Request Forgery)
 
-| Threat agents/Attack vectors | Security Weakness | Impacts |
+| 脅威エージェント/攻撃手法 | セキュリティ上の弱点 | 影響 |
 | - | - | - |
-| API Specific : Exploitability **Easy** | Prevalence **Common** : Detectability **Easy** | Technical **Moderate** : Business Specific |
-| Exploitation requires the attacker to find an API endpoint that accesses a URI that’s provided by the client. In general, basic SSRF (when the response is returned to the attacker), is easier to exploit than Blind SSRF in which the attacker has no feedback on whether or not the attack was successful. | Modern concepts in application development encourage developers to access URIs provided by the client. Lack of or improper validation of such URIs are common issues. Regular API requests and response analysis will be required to detect the issue. When the response is not returned (Blind SSRF) detecting the vulnerability requires more effort and creativity. | Successful exploitation might lead to internal services enumeration (e.g. port scanning), information disclosure, bypassing firewalls, or other security mechanisms. In some cases, it can lead to DoS or the server being used as a proxy to hide malicious activities. |
+| API 依存 : 悪用難易度 **容易** | 普及度 **普通** : 検出難易度 **容易** | 技術的影響 **中程度** : ビジネス依存 |
+| 悪用にはクライアントが提供する URI にアクセスする API エンドポイントを攻撃者が見つける必要があります。一般的に、基本的な SSRF (レスポンスが攻撃者に返される場合) は、攻撃が成功したかどうかについて攻撃者にフィードバックがないブラインド SSRF よりも悪用しやすくなります。 | アプリケーション開発における最近のコンセプトでは開発者はクライアントが提供する URI にアクセスすることを推奨しています。そのような URI の検証が欠如していたり不適切であることがよくある問題です。問題を検出するには、定期的な API リクエストとレスポンスの解析が必要です。レスポンスが返されない場合 (ブラインド SSRF)、脆弱性を検出するにはより多くの労力と創造性が必要になります。 | 悪用に成功すると、内部サービスの列挙 (ポートスキャンなど) 、情報漏洩、ファイアウォールやその他のセキュリティメカニズムのバイパスにつながる可能性があります。場合によっては、DoS が発生したり、サーバーが悪意のあるアクティビティを隠すためのプロキシとして使用される可能性もあります。 |
 
-## Is the API Vulnerable?
+## その API は脆弱か？
 
-Server-Side Request Forgery (SSRF) flaws occur when an API is fetching a remote
-resource without validating the user-supplied URL. It enables an attacker to
-coerce the application to send a crafted request to an unexpected destination,
-even when protected by a firewall or a VPN.
+サーバーサイドリクエストフォージェリ (SSRF) の欠陥はユーザーが提供する URL を検証せずにリモートリソースを API が取得する際に発生します。
+これによりファイアウォールや VPN で保護されている場合でも、攻撃者はアプリケーションを強制して細工したリクエストを予期しない宛先に送信できます。
 
-Modern concepts in application development make SSRF more common and more
-dangerous.
 
-More common - the following concepts encourage developers to access an external
-resource based on user input: Webhooks, file fetching from URLs, custom SSO,
-and URL previews.
 
-More dangerous - Modern technologies like cloud providers, Kubernetes, and
-Docker expose management and control channels over HTTP on predictable,
-well-known paths. Those channels are an easy target for an SSRF attack.
+アプリケーション開発における最近のコンセプトにより SSRF はより一般的でより危険なものになっています。
 
-It is also more challenging to limit outbound traffic from your application,
-because of the connected nature of modern applications.
 
-The SSRF risk can not always be completely eliminated. While choosing a
-protection mechanism, it is important to consider the business risks and needs.
+より一般的に - Webhook、URL からのファイルフェッチ、カスタム SSO、URL プレビューなどのコンセプトは開発者がユーザーの入力に基づいて外部リソースにアクセスすることを推奨します。
 
-## Example Attack Scenarios
 
-### Scenario #1
 
-A social network allows users to upload profile pictures. The user can choose
-either to upload the image file from their machine, or provide the URL of the
-image. Choosing the second, will trigger the following API call:
+より危険に - クラウドプロバイダ、Kubernetes、Docker などの最近のテクノロジは予測可能でよく知られたパスで HTTP を介して管理チャンネルと制御チャンネルを公開します。
+これらのチャンネルは SSRF 攻撃の格好のターゲットになります。
+
+
+また、最近のアプリケーションは接続されていることが自然であるため、アプリケーションのアウトバウンドトラフィックを制限することはより困難です。
+
+
+SSRF のリスクは完全に排除できるとは限りません。
+保護メカニズムを選択する際には、ビジネスリスクとニーズを考慮することが重要です。
+
+## 攻撃シナリオの例
+
+### シナリオ #1
+
+あるソーシャルネットワークではユーザーがプロフィール画像をアップロードできます。
+ユーザーは自分のマシンから画像ファイルをアップロードするか、画像の URL を提供するかのいずれかを選択できます。
+二つ目を選択すると、以下の API コールをトリガーします。
 
 ```
 POST /api/profile/upload_picture
@@ -45,8 +45,8 @@ POST /api/profile/upload_picture
 }
 ```
 
-An attacker can send a malicious URL and initiate port scanning within the
-internal network using the API Endpoint.
+攻撃者は悪意のある URL を送信し、API エンドポイント使用して内部ネットワーク内でポートスキャンを開始できます。
+
 
 ```
 {
@@ -54,18 +54,18 @@ internal network using the API Endpoint.
 }
 ```
 
-Based on the response time, the attacker can figure out whether the port is
-open or not.
+レスポンスタイムから攻撃者はポートが開いているかどうかを把握できます。
 
-### Scenario #2
 
-A security product generates events when it detects anomalies in the network.
-Some teams prefer to review the events in a broader, more generic monitoring
-system, such as a SIEM (Security Information and Event Management). For this
-purpose, the product provides integration with other systems using webhooks.
+### シナリオ #2
 
-As part of a creation of a new webhook, a GraphQL mutation is sent with the URL
-of the SIEM API.
+あるセキュリティ製品ではネットワークで異常を検出するとイベントを生成します。
+チームによっては、SIEM (Security Information and Event Management) などのより広範で一般的な監視システムでイベントを確認することを好みます。
+この目的のために、この製品は Webhook を使用して他のシステムとの統合を提供します。
+
+
+新しい Webhook の作成の一環として、GraphQL 情報が SIEM API の URL とともに送信されます。
+
 
 ```
 POST /graphql
@@ -93,11 +93,11 @@ POST /graphql
 
 ```
 
-During the creation process, the API back-end sends a test request to the
-provided webhook URL, and presents to the user the response.
+この作成プロセスでは、API バックエンドが提供された Webhook URL にテストリクエストを送信し、ユーザーにレスポンスを提示します。
 
-An attacker can leverage this flow, and make the API request a sensitive
-resource, such as an internal cloud metadata service that exposes credentials:
+
+攻撃者はこのフローを活用し、認証情報を公開する内部クラウドメタデータなどの機密リソースを API にリクエストできます。
+
 
 ```
 POST /graphql
@@ -124,32 +124,32 @@ POST /graphql
 ]
 ```
 
-Since the application shows the response from the test request, the attacker
-can view the credentials of the cloud environment.
+アプリケーションはテストリクエストからのレスポンスを表示するので、攻撃者はクラウド環境の認証情報を閲覧できます。
 
-## How To Prevent
 
-* Isolate the resource fetching mechanism in your network: usually these
-  features are aimed to retrieve remote resources and not internal ones.
-* Whenever possible, use allow lists of:
-  * Remote origins users are expected to download resources from (e.g. Google
-    Drive, Gravatar, etc.)
-  * URL schemes and ports
-  * Accepted media types for a given functionality
-* Disable HTTP redirections.
-* Use a well-tested and maintained URL parser to avoid issues caused by URL
-  parsing inconsistencies.
-* Validate and sanitize all client-supplied input data.
-* Do not send raw responses to clients.
+## 防止方法
 
-## References
+* ネットワーク内のリソース取得メカニズムを分離します。通常、この機能はリモートリソースを取得するためのものであり、内部リソースではありません。
+
+* 可能な限り、以下の許可リストを使用します。
+  * ユーザーがリソースをダウンロードすることが想定されるリモートオリジン (Google ドライブ、Gravatar など)
+
+  * URL スキーマとポート
+  * 特定の機能で受け入れられるメディアタイプ
+* HTTP リダイレクトを無効にします。
+* URL パースの不一致によって引き起こされる問題を避けるために、十分にテストされ保守されている URL パーサーを使用します。
+
+* クライアントから提供されるすべての入力データを検証してサニタイズします。
+* クライアントに未加工のレスポンスを送信してはいけません。
+
+## 参考資料
 
 ### OWASP
 
 * [Server Side Request Forgery][1]
 * [Server-Side Request Forgery Prevention Cheat Sheet][2]
 
-### External
+### その他
 
 * [CWE-918: Server-Side Request Forgery (SSRF)][3]
 * [URL confusion vulnerabilities in the wild: Exploring parser inconsistencies,
