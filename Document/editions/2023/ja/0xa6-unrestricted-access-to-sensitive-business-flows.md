@@ -1,101 +1,101 @@
-# API6:2023 Unrestricted Access to Sensitive Business Flows
+# API6:2023 機密性の高いフローへの制限のないアクセス (Unrestricted Access to Sensitive Business Flows)
 
-| Threat agents/Attack vectors | Security Weakness | Impacts |
+| 脅威エージェント/攻撃手法 | セキュリティ上の弱点 | 影響 |
 | - | - | - |
-| API Specific : Exploitability **Easy** | Prevalence **Widespread** : Detectability **Average** | Technical **Moderate** : Business Specific |
-| Exploitation usually involves understanding the business model backed by the API, finding sensitive business flows, and automating access to these flows, causing harm to the business. | Lack of a holistic view of the API in order to fully support business requirements tends to contribute to the prevalence of this issue. Attackers manually identify what resources (e.g. endpoints) are involved in the target workflow and how they work together. If mitigation mechanisms are already in place, attackers need to find a way to bypass them. | In general technical impact is not expected. Exploitation might hurt the business in different ways, for example: prevent legitimate users from purchasing a product, or lead to inflation in the internal economy of a game. |
+| API 依存 : 悪用難易度 **容易** | 普及度 **広範** : 検出難易度 **平均的** | 技術的影響 **中程度** : ビジネス依存 |
+| 悪用には通常、API 支援のビジネスモデルを理解すること、機密性の高いビジネスフローを見つけること、そのフローへのアクセスを自動化することを伴い、ビジネスに損害を与えます。 | ビジネス要件を完全にサポートするための API の全体的なビューが欠如していると、この問題が蔓延する傾向があります。攻撃者はターゲットのワークフローにどのようなリソース (エンドポイントなど) が関与しているか、それらがどのように連携するかを手作業で特定します。緩和メカニズムがすでに導入されている場合、攻撃者はそれをバイパスする方法を見つける必要があります。 | 一般的に、技術的影響は期待されません。悪用はさまざまな方法でビジネスに損害を与える可能性があります。たとえば、正規のユーザーが製品を購入できなくしたり、ゲームの内部経済がインフレーションを引き起こす可能性があります。 |
 
-## Is the API Vulnerable?
+## その API は脆弱か？
 
-When creating an API Endpoint, it is important to understand which business flow
-it exposes. Some business flows are more sensitive than others, in the sense
-that excessive access to them may harm the business.
+API エンドポイントを作成する際には、どのようなビジネスフローを公開するかを理解することが重要です。
+ビジネスフローの中には、過度のアクセスがビジネスに損害をもたらす可能性があるという意味で、他のビジネスフローよりも機密性が高いものがあります。
 
-Common examples of sensitive business flows and risk of excessive access
-associated with them:
 
-* Purchasing a product flow - an attacker can buy all the stock of a high-demand
-  item at once and resell for a higher price (scalping)
-* Creating a comment/post flow - an attacker can spam the system
-* Making a reservation - an attacker can reserve all the available time slots
-  and prevent other users from using the system
+機密性の高いビジネスフローとそれに関連する過剰なアクセスのリスクの一般的な例:
 
-The risk of excessive access might change between industries and businesses.
-For example - creation of posts by a script might be considered as a risk of
-spam by one social network, but encouraged by another social network.
 
-An API Endpoint is vulnerable if it exposes a sensitive business flow, without
-appropriately restricting the access to it.
+* 製品購入フロー - 攻撃者は需要の高い商品の在庫を一度にすべて購入し、より高い価格で転売できます (スキャルピング)
 
-## Example Attack Scenarios
+* コメント作成・投稿フロー - 攻撃者はシステムにスパムを実行できます
+* 予約 - 攻撃者は利用可能な時間帯をすべて予約し、他のユーザーがシステムを使用できなくします
 
-### Scenario #1
 
-A technology company announces they are going to release a new gaming console on
-Thanksgiving. The product has a very high demand and the stock is limited. An
-attacker writes code to automatically buy the new product and complete the
-transaction.
+過剰なアクセスのリスクは業種や業務によって異なる可能性があります。
+たとえば - スクリプトによる投稿の作成はあるソーシャルネットワークではスパムのリスクとみなされますが、別のソーシャルネットワークでは推奨されるかもしれません。
 
-On the release day, the attacker runs the code distributed across different IP
-addresses and locations. The API doesn't implement the appropriate protection
-and allows the attacker to buy the majority of the stock before other legitimate
-users.
 
-Later on, the attacker sells the product on another platform for a much higher
-price.
+API エンドポイントへのアクセスを適切に制限せずに、機密性の高いビジネスフローを公開している場合、API エンドポイントは脆弱になります。
 
-### Scenario #2
 
-An airline company offers online ticket purchasing with no cancellation fee. A
-user with malicious intentions books 90% of the seats of a desired flight.
+## 攻撃シナリオの例
 
-A few days before the flight the malicious user canceled all the tickets at
-once, which forced the airline to discount the ticket prices in order to fill
-the flight.
+### シナリオ #1
 
-At this point, the user buys herself a single ticket that is much cheaper than
-the original one.
+あるテクノロジ企業が感謝祭に新しいゲーム機を発売すると発表しました。
+この製品は非常に高い需要があり、在庫は限られています。
+攻撃者は新しい製品を自動的に購入してトランザクションを完了するコードを記述します。
 
-### Scenario #3
 
-A ride-sharing app provides a referral program - users can invite their friends
-and gain credit for each friend who has joined the app. This credit can be later
-used as cash to book rides.
+発売日に攻撃者はさまざまな IP アドレスやロケーションに分散したコードを実行します。
+API は適切な保護を実装しておらず、攻撃者は他の正当なユーザーよりも先に在庫の大部分を購入できます。
 
-An attacker exploits this flow by writing a script to automate the registration
-process, with each new user adding credit to the attacker's wallet.
 
-The attacker can later enjoy free rides or sell the accounts with excessive
-credits for cash.
 
-## How To Prevent
+その後、攻撃者は別のプラットフォームでその製品をはるかに高い価格で販売します。
 
-The mitigation planning should be done in two layers:
 
-* Business - identify the business flows that might harm the business if they
-  are excessively used.
-* Engineering - choose the right protection mechanisms to mitigate the business
-  risk.
+### シナリオ #2
 
-  Some of the protection mechanisms are more simple while others are more
-  difficult to implement. The following methods are used to slow down automated
-  threats:
+ある航空会社ではキャンセル料無料で購入できるオンラインチケットを提供しています。
+悪意のあるユーザーが希望するフライトの座席の 90% を予約しました。
 
-  * Device fingerprinting: denying service to unexpected client devices (e.g
-    headless browsers) tends to make threat actors use more sophisticated
-    solutions, thus more costly for them
-  * Human detection: using either captcha or more advanced biometric solutions
-    (e.g. typing patterns)
-  * Non-human patterns: analyze the user flow to detect non-human patterns (e.g.
-    the user accessed the "add to cart" and "complete purchase" functions in
-    less than one second)
-  * Consider blocking IP addresses of Tor exit nodes and well-known proxies
+フライトの数日前に悪意のあるユーザーがすべてのチケットを一度にキャンセルしたため、航空会社はフライトを埋めるためにチケットの価格を下げざるを得なくなりました。
 
-  Secure and limit access to APIs that are consumed directly by machines (such
-  as developer and B2B APIs). They tend to be an easy target for attackers
-  because they often don't implement all the required protection mechanisms.
 
-## References
+
+この時点で、ユーザーは元のチケットよりもはるかに安い一枚のチケットを自分で購入します。
+
+
+### シナリオ #3
+
+ライドシェアアプリは紹介プログラムを提供しています。ユーザーは友達を招待し、アプリに参加した友達ごとにクレジットを獲得できます。
+このクレジットは後ほど乗車を予約する際に現金として使用できます。
+
+
+攻撃者はこのフローを悪用し、スクリプトを記述して登録プロセスを自動化し、新規ユーザーごとに攻撃者のウォレットにクレジットを追加します。
+
+
+攻撃者は後ほど無料乗車を楽しんだり、過剰なクレジットを持つアカウントを売却して現金に換えることができます。
+
+
+## 防止方法
+
+緩和計画は二つの層で行います。
+
+* ビジネス - 過度に使用された場合にビジネスに悪影響を及ぼす可能性のあるビジネスフローを特定します。
+
+* エンジニアリング - 適切な保護メカニズムを選択して、ビジネスリスクを軽減します。
+
+
+  保護メカニズムの中にはよりシンプルなものもあれば、実装がより困難なものもあります。自動化された脅威を遅らせるには以下の方法を使用します。
+
+
+
+  * デバイスフィンガープリント: 予期せぬクライアントデバイス (ヘッドレスブラウザなど) へのサービスを拒否すると、脅威アクターはより洗練されたソリューションを使用する傾向があり、脅威アクターにとってよりコストがかかるようになります。
+
+
+  * 人間検出: CAPTCHA やより高度な生体認証ソリューション (タイピングパターンなど) のいずれかを使用します。
+
+  * 非人間パターン: ユーザーフローを解析して非人間パターン (「カートに追加」や「購入を完了」機能を一秒以内でアクセスしたユーザーなど) を検出します。
+
+
+  * Tor 出口ノードやよく知られたプロキシの IP アドレスをブロックすることを検討します。
+
+  マシンによって直接使用される API (開発者 API や B2B API など) へのアクセスを保護して制限します。これらは必要な保護メカニズムのすべてを実装してはいないことが多いため、攻撃者の格好のターゲットになる傾向があります。
+
+
+
+## 参考資料
 
 ### OWASP
 
