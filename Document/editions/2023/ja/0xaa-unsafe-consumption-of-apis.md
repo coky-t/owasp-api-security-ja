@@ -1,47 +1,47 @@
-# API10:2023 Unsafe Consumption of APIs
+# API10:2023 API の安全でない使用 (Unsafe Consumption of APIs)
 
-| Threat agents/Attack vectors | Security Weakness | Impacts |
+| 脅威エージェント/攻撃手法 | セキュリティ上の弱点 | 影響 |
 | - | - | - |
-| API Specific : Exploitability **Easy** | Prevalence **Common** : Detectability **Average** | Technical **Severe** : Business Specific |
-| Exploiting this issue requires attackers to identify and potentially compromise other APIs/services the target API integrated with. Usually, this information is not publicly available or the integrated API/service is not easily exploitable. | Developers tend to trust and not verify the endpoints that interact with external or third-party APIs, relying on weaker security requirements such as those regarding transport security, authentication/authorization, and input validation and sanitization. Attackers need to identify services the target API integrates with (data sources) and, eventually, compromise them. | The impact varies according to what the target API does with pulled data. Successful exploitation may lead to sensitive information exposure to unauthorized actors, many kinds of injections, or denial of service. |
+| API 依存 : 悪用難易度 **容易** | 普及度 **普通** : 検出難易度 **平均的** | 技術的影響 **重度** : ビジネス依存 |
+| この問題を悪用するには攻撃者がターゲット API と統合している他の API やサービスを特定して潜在的に侵害することが必要です。通常、この情報は公開されていないか、統合している API やサービスを悪用することは容易ではありません。 | 開発者は外部 API やサードパーティ API とやり取りするエンドポイントを信頼はしても検証しない傾向にあり、トランスポートセキュリティ、認証、認可、入力バリデーションとサニタイズなど、より弱いセキュリティ要件に依存します。攻撃者はターゲット API が統合するサービス (データソース) を特定し、最終的にはそれらを侵害する必要があります。 | 影響はターゲット API が引き出されたデータに対して何を行うかによって異なります。悪用に成功すると、認可されていないアクターへの機密情報の漏洩、さまざまな種類のインジェクション、サービス拒否につながる可能性があります。 |
 
-## Is the API Vulnerable?
+## その API は脆弱か？
 
-Developers tend to trust data received from third-party APIs more than user
-input. This is especially true for APIs offered by well-known companies.
-Because of that, developers tend to adopt weaker security standards, for
-instance, in regards to input validation and sanitization.
+開発者はサードパーティ API から受け取ったデータをユーザー入力よりも信頼する傾向があります。
+これは特に有名企業が提供する API に当てはまります。
+そのため、開発者はたとえば入力バリデーションやサニタイズに関して、より弱いセキュリティ標準を採用する傾向があります。
 
-The API might be vulnerable if:
 
-* Interacts with other APIs over an unencrypted channel;
-* Does not properly validate and sanitize data gathered from other APIs prior
-  to processing it or passing it to downstream components;
-* Blindly follows redirections;
-* Does not limit the number of resources available to process third-party
-  services responses;
-* Does not implement timeouts for interactions with third-party services;
+以下の場合、API は脆弱である可能性があります。
 
-## Example Attack Scenarios
+* 暗号化されていないチャネルを介して他の API とやり取りする場合。
+* 他の API から収集したデータを処理する前やダウンストリームコンポーネントに渡す前に、適切にバリデーションとサニタイズを行っていない場合。
 
-### Scenario #1
+* リダイレクトに盲目的に従っている場合。
+* サードパーティサービスのレスポンスを処理するために利用できるリソースの数を制限していない場合。
 
-An API relies on a third-party service to enrich user provided business
-addresses. When an address is supplied to the API by the end user, it is sent
-to the third-party service and the returned data is then stored on a local
-SQL-enabled database.
+* サードパーティサービスとのやり取りにタイムアウトを実装していない場合。
 
-Bad actors use the third-party service to store an SQLi payload associated with
-a business created by them. Then they go after the vulnerable API providing
-specific input that makes it pull their "malicious business" from the
-third-party service. The SQLi payload ends up being executed by the database,
-exfiltrating data to an attacker's controlled server.
+## 攻撃シナリオの例
 
-### Scenario #2
+### シナリオ #1
 
-An API integrates with a third-party service provider to safely store sensitive
-user medical information. Data is sent over a secure connection using an HTTP
-request like the one below:
+ある API はユーザーが提供するビジネスアドレスを充実させるためにサードパーティサービスに依存しています。
+エンドユーザーによって API にアドレスが提供されると、そのアドレスはサードパーティサービスに送信され、返されたデータはローカルの SQL 対応データベースに保存されます。
+
+
+
+悪意のあるアクターはサードパーティサービスを使用して、自分が作成したビジネスに関連する SQLi ペイロードを保存します。
+それから、脆弱な API に特定の入力を与えて、サードパーティサービスから「悪意のあるビジネス」を引き出します。
+SQLi ペイロードは最終的にデータベースによって実行され、データは攻撃者のコントロール下にあるサーバーに流出します。
+
+
+
+### シナリオ #2
+
+ある API は機密性の高いユーザーの医療情報を安全に保存するためにサードパーティサービスと統合しています。
+データは以下のような HTTP リクエストを使用してセキュアコネクションを介して送信されます。
+
 
 ```
 POST /user/store_phr_record
@@ -50,37 +50,37 @@ POST /user/store_phr_record
 }
 ```
 
-Bad actors found a way to compromise the third-party API and it starts
-responding with a `308 Permanent Redirect` to requests like the previous one.
+悪意のあるアクターはサードパーティ API を侵害する方法を発見し、前述のようなリクエストに対して `308 Permanent Redirect` でレスポンスするようになりました。
+
 
 ```
 HTTP/1.1 308 Permanent Redirect
 Location: https://attacker.com/
 ```
 
-Since the API blindly follows the third-party redirects, it will repeat the
-exact same request including the user's sensitive data, but this time to the
-attacker's server.
-
-### Scenario #3
-
-An attacker can prepare a git repository named `'; drop db;--`.
-
-Now, when an integration from an attacked application is done with the
-malicious repository, SQL injection payload is used on an application that
-builds an SQL query believing the repository's name is safe input.
-
-## How To Prevent
-
-* When evaluating service providers, assess their API security posture.
-* Ensure all API interactions happen over a secure communication channel (TLS).
-* Always validate and properly sanitize data received from integrated APIs
-  before using it.
-* Maintain an allowlist of well-known locations integrated APIs may redirect
-  yours to: do not blindly follow redirects.
+その API はサードパーティのリダイレクトに盲目的に従うため、ユーザーの機密データを含むまったく同じリクエストを繰り返しますが、今度は攻撃者のサーバーに送られます。
 
 
-## References
+
+### シナリオ #3
+
+攻撃者は `'; drop db;--` という名前の git リポジトリを用意できます。
+
+ここで、攻撃されたアプリケーションから悪意のあるリポジトリとの統合が行われると、リポジトリの名前が安全な入力であると信じて SQL クエリを構築するアプリケーションで SQL インジェクションペイロードが使用されます。
+
+
+
+## 防止方法
+
+* サービスプロバイダを評価する際には、API セキュリティ態勢を評価します。
+* すべての API インタラクションが安全な通信チャネル (TLS) 上で行われることを確認します。
+* 統合された API から受け取ったデータを使用する前に、常にバリデーションとサニタイズを行います。
+
+* 統合された API がリダイレクトする可能性のあるよく知られた場所の許可リストを保守します。リダイレクトに盲目的に従ってはいけません。
+
+
+
+## 参考資料
 
 ### OWASP
 
@@ -91,7 +91,7 @@ builds an SQL query believing the repository's name is safe input.
 * [Transport Layer Protection Cheat Sheet][5]
 * [Unvalidated Redirects and Forwards Cheat Sheet][6]
 
-### External
+### その他
 
 * [CWE-20: Improper Input Validation][7]
 * [CWE-200: Exposure of Sensitive Information to an Unauthorized Actor][8]
