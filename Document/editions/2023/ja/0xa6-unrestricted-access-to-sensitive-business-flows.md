@@ -1,4 +1,4 @@
-# API6:2023 機密性の高いフローへの制限のないアクセス (Unrestricted Access to Sensitive Business Flows)
+# API6:2023 機密性の高いビジネスフローへの制限のないアクセス (Unrestricted Access to Sensitive Business Flows)
 
 | 脅威エージェント/攻撃手法 | セキュリティ上の弱点 | 影響 |
 | - | - | - |
