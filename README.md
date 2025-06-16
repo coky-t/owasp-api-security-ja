@@ -2,6 +2,9 @@
 
 This is the unofficial Japanese translation of the [OWASP API Security Top 10](https://github.com/OWASP/API-Security).
 
+- Document Site - <https://coky-t.gitbook.io/owasp-api-security-ja/>
+- Document Repository - <https://github.com/coky-t/owasp-api-security-ja>
+
 ### Originator
 
 - Project Site - <https://owasp.org/www-project-api-security/>
@@ -28,3 +31,6 @@ This is the unofficial Japanese translation of the [OWASP API Security Top 10](h
 ## Translator (Japanese)
 
 [Koki Takeyama](https://github.com/coky-t)
+
+- Document Site - <https://coky-t.gitbook.io/owasp-docs-ja/>
+- Document Repository - <https://github.com/coky-t/owasp-docs-ja>
